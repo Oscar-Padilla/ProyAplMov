@@ -1,20 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import IniciodeSesion from './src/screens/IniciodeSesion';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Este es nuestro proyecto</Text>
-      <StatusBar style="auto" />
+    <View>
+      <IniciodeSesion />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
