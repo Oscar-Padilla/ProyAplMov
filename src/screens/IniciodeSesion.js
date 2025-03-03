@@ -1,7 +1,7 @@
 import { Button, Image, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import logo from '../../assets/img/Logo.png';
 
-const IniciodeSesion = () => {
+const IniciodeSesion = ({setModalVisible}) => {
   return (
     <View style={styles.todo}>
         <View style={styles.container}>
@@ -11,7 +11,7 @@ const IniciodeSesion = () => {
             </View>
             <View style={styles.forms}>
                 <View style={styles.boton}>
-                    <TouchableOpacity style={styles.btnsesion}>
+                    <TouchableOpacity style={styles.btnsesion} onPress={() => setModalVisible(true)}>
                         <Text style={styles.textbtnsesion}>Iniciar Sesión</Text>
                     </TouchableOpacity>
                 </View>
