@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Button, Image, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import IniciodeSesion_1 from './IniciodeSesion_1';
 import logo from '../../assets/img/Logo.png';
 
-const IniciodeSesion = ({setModalVisible}) => {
+const IniciodeSesion = ({navigation}) => {
+  const [modalVisible, setModalVisible] = useState(false);
   return (
     <View style={styles.todo}>
         <View style={styles.container}>
@@ -16,11 +19,12 @@ const IniciodeSesion = ({setModalVisible}) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.boton}>
-                    <TouchableOpacity style={styles.btnregis}>
+                    <TouchableOpacity style={styles.btnregis} onPress={() => navigation.navigate("Registrate")}>
                         <Text style={styles.textbtnregis}>Regístrate</Text>
                     </TouchableOpacity>
                 </View>
             </View>
+            <IniciodeSesion_1 modalVisible={modalVisible} setModalVisible={setModalVisible} />
             <View style={styles.terms}>
                 <View style={styles.termframe}>
                     <Text style={styles.textterms}>
@@ -48,6 +52,7 @@ const styles = StyleSheet.create({
       paddingRight: 9,
       flexDirection: 'column',
       alignItems: 'center',
+      backgroundColor: 'white',
     },
     container: {
       display: 'flex',
