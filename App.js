@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import IniciodeSesion from './src/screens/IniciodeSesion';
 import IniciodeSesion_1 from './src/screens/IniciodeSesion_1';
+import Registrate from './src/screens/Registrate';
 import { useState } from 'react';
 
 export default function App() {
@@ -12,3 +13,12 @@ export default function App() {
     </View>
   );
 }
+
+
+// export default function App() {
+//   return (
+//     <View>
+//       <IniciodeSesion />
+//     </View>
+//   );
+// }
