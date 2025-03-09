@@ -1,5 +1,3 @@
-import { StyleSheet, View} from 'react-native';
-import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import IniciodeSesion from './src/screens/IniciodeSesion';
@@ -10,18 +8,10 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer >
-      <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: "white" } }}>
         <Stack.Screen name="IniciodeSesion" component={IniciodeSesion} />
         <Stack.Screen name="Registrate" component={Registrate} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-// export default function App() {
-//   return (
-//     <View>
-//       <IniciodeSesion />
-//     </View>
-//   );
-// }
