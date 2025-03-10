@@ -9,7 +9,7 @@ export default function App() {
   return (
     <NavigationContainer >
       <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: "white" } }}>
-        <Stack.Screen name="IniciodeSesion" component={IniciodeSesion} />
+        <Stack.Screen name="IniciodeSesion" component={IniciodeSesion} options={{animation: 'slide_from_left'}}/>
         <Stack.Screen name="Registrate" component={Registrate} />
       </Stack.Navigator>
     </NavigationContainer>
