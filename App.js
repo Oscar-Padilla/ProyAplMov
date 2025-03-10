@@ -1,14 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import IniciodeSesion from './src/screens/IniciodeSesion';
-import IniciodeSesion_1 from './src/screens/IniciodeSesion_1';
-import { useState } from 'react';
+import Registrate from './src/screens/Registrate';
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [modalVisible, setModalVisible] = useState(false);
   return (
-    <View>
-      <IniciodeSesion setModalVisible={setModalVisible}/>
-      <IniciodeSesion_1 modalVisible={modalVisible} setModalVisible={setModalVisible}/>
-    </View>
+    <NavigationContainer >
+      <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: "white" } }}>
+        <Stack.Screen name="IniciodeSesion" component={IniciodeSesion} options={{animation: 'slide_from_left'}}/>
+        <Stack.Screen name="Registrate" component={Registrate} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
