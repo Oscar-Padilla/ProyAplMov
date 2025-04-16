@@ -32,7 +32,7 @@ const Registrate3 = ({navigation}) => {
               <View style={[styles.progressBarFill, {width: `${progreso * 100}%`}]}/>
               <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("")} style={styles.btnNext} >
+            <TouchableOpacity onPress={() => navigation.navigate("HomeAlumno")} style={styles.btnNext} >
                 <Text style={styles.text}>Siguiente</Text>
             </TouchableOpacity>
           </View>
