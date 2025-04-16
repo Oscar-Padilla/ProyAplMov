@@ -9,7 +9,6 @@ import evento2 from '../../assets/img/Evento2.png';
 const HomeAlumno = () => {
     const [text, setText] = useState("");
 
-
     return (
         <View style={styles.overlay}>
             <View style={styles.search}>

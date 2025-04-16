@@ -1,12 +1,11 @@
 import { Text, Modal, View, TouchableOpacity, Image, StyleSheet, Animated } from "react-native";
-import Cerca from '../../assets/img/Cerca.png';
+import Llegaste from '../../assets/img/Llegaste.png';
 import React, { useEffect, useRef } from 'react';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import RegistraAsistenciaAlumno1 from "./RegistrarAsistenciaAlumno1";
 
-const RegistraAsistenciaAlumno = () => {
+const RegistraAsistenciaAlumno1 = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const [abrir, setAbrir] = useState(true);
 
@@ -43,12 +42,11 @@ const RegistraAsistenciaAlumno = () => {
                         <TouchableOpacity onPress={() => setAbrir(false)} style={styles.closeButton}>
                             <Feather name="x" size={30} color="white" />
                         </TouchableOpacity>
-                        <Image source={Cerca} style={styles.cerca} />
+                        <Image source={Llegaste} style={styles.cerca} />
                         <View style={styles.text}>
-                            <Text style={styles.text1}>¡Estás cerca!</Text>
-                            <Text style={styles.text2}>Acércate a la ubicación para registrar tu asistencia</Text>
+                            <Text style={styles.text1}>¡Llegaste!</Text>
+                            <Text style={styles.text2}>Se registró tu asistencia</Text>
                         </View>
-                        <RegistraAsistenciaAlumno1 />
                     </View>
                 </View>
             </Animated.View>
@@ -60,10 +58,10 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end", // Hace que el modal salga desde abajo
-    backgroundColor: "rgba(0,0,0,0.5)", // Oscurece el fondo
+    // backgroundColor: "rgba(0,0,0,0.5)", // Oscurece el fondo
   },
   modalContainer: {
-    backgroundColor: "#EF5350",
+    backgroundColor: "#66BB6A",
     width: "100%",
     borderTopLeftRadius: 30, // Bordes redondeados arriba
     borderTopRightRadius: 30,
@@ -118,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegistraAsistenciaAlumno;
+export default RegistraAsistenciaAlumno1;
