@@ -1,8 +1,9 @@
-import { Text, View, StyleSheet, TextInput, ScrollView, ImageBackground } from "react-native";
+import { Text, View, StyleSheet, TextInput, ScrollView, ImageBackground, TouchableOpacity } from "react-native";
 import { useState, useEffect } from 'react';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -11,6 +12,7 @@ import evento2 from '../../assets/img/Evento2.png';
 
 const HomeAlumno = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
 
   useEffect(() => {
     lockPortrait();
@@ -46,14 +48,16 @@ const HomeAlumno = () => {
           <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.dataMaterias}>
-              <View style={styles.materia}>
-                <ImageBackground source={materia1} style={styles.imgMateria}>
-                  <View style={styles.overlaymateria}>
-                    <Text style={styles.textGrupo}>TC1 2025A</Text>
-                    <Text style={styles.textMateria}>Aplicaciones Móviles Multiplataforma</Text>
-                  </View>
-                </ImageBackground>
-              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('MateriaAlumno')}>
+                <View style={styles.materia}>
+                  <ImageBackground source={materia1} style={styles.imgMateria}>
+                    <View style={styles.overlaymateria}>
+                      <Text style={styles.textGrupo}>TC1 2025A</Text>
+                      <Text style={styles.textMateria}>Aplicaciones Móviles Multiplataforma</Text>
+                    </View>
+                  </ImageBackground>
+                </View>
+              </TouchableOpacity>
               <View style={styles.materia}>
                 <ImageBackground source={materia2} style={styles.imgMateria}>
                   <View style={styles.overlaymateria}>

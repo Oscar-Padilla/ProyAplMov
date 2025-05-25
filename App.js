@@ -27,6 +27,7 @@ import Inscripcion from './src/screens/Inscripcion';
 import RegistrarAsistenciaAlumno from './src/screens/RegistrarAsistenciaAlumno';
 import Settings from './src/screens/Settings';
 import CuentaAlumno from './src/screens/CuentaAlumno';
+import MateriaAlumno from './src/screens/MateriaAlumno';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -129,6 +130,7 @@ function AppContent() {
       >
         <Stack.Screen name="Registro" component={RegistroStack} />
         <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ gestureEnabled: false }} />
+        <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
       </Stack.Navigator>
     </>
   );
