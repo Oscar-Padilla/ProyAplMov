@@ -18,6 +18,7 @@ import Registrate3 from './src/screens/Registrate3';
 
 // Pantallas del TabNavigator (después de login)
 import HomeAlumno from './src/screens/HomeAlumno';
+import Inscripcion from './src/screens/Inscripcion';
 import InscripcionAlumnoMateria from './src/screens/InscripcionAlumnoMateria';
 import RegistrarAsistenciaAlumno from './src/screens/RegistrarAsistenciaAlumno';
 import Settings from './src/screens/Settings';
@@ -56,8 +57,8 @@ function HomeTabs() {
         }}
       />
       <Tab.Screen 
-        name="InscripcionAlumnoMateria" 
-        component={InscripcionAlumnoMateria}
+        name="Inscripcion" 
+        component={Inscripcion}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => {
