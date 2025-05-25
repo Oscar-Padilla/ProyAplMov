@@ -39,7 +39,7 @@ const CuentaAlumno = () => {
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
         <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
-          <View style={[styles.profileIcn, { borderColor: theme.text }]}>
+          <View style={[styles.profileIcn, { borderColor: theme.background }]}>
             <Text style={[styles.textProfile, { color: '#fff' }]}>FM</Text>
           </View>
         </View>
@@ -75,13 +75,13 @@ const CuentaAlumno = () => {
             style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn, selected === 'materias' && { backgroundColor: theme.primary }]}
             onPress={() => setSelected('materias')}
           >
-            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'materias' && { color: '#fff' }]} >Materias</Text>
+            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'eventos'  && { color: theme.text }]} >Materias</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.btnEventos, selected === 'eventos' && styles.activeBtn, selected === 'eventos' && { backgroundColor: theme.primary }]}
             onPress={() => setSelected('eventos')}
           >
-            <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt, selected === 'eventos' && { color: '#fff' }]}>Eventos</Text>
+            <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt, selected === 'materias' && { color: theme.text }]}>Eventos</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.content}>
