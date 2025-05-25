@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TextInput, Image, ScrollView, ImageBackground } from "react-native";
+import { Text, View, StyleSheet, TextInput, ScrollView, ImageBackground } from "react-native";
 import { useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import materia1 from '../../assets/img/Materia1.png';
@@ -29,24 +29,25 @@ const HomeAlumno = () => {
                     <Text style={styles.textTitulo}>La inspiración de hoy</Text>
                 </View>
             </View>
+            {/* Container Materias */}
             <View style={styles.containerMaterias}>
                 <View style={styles.materias}>
                     <Text style={styles.textMaterias}>Materias</Text>
                     <ScrollView horizontal={true} style={{flexDirection:'row'}} showsHorizontalScrollIndicator={false}>
                         <View style={styles.dataMaterias}>
-                            <View style={styles.materia1}>
-                                <ImageBackground source={materia1} style={styles.imgMateria1}>
+                            <View style={styles.materia}>
+                                <ImageBackground source={materia1} style={styles.imgMateria}>
                                     <View style={styles.overlaymateria}>
-                                        <Text style={styles.textGrupo1}>TC1 2025A</Text>
-                                        <Text style={styles.textMateria1}>Aplicaciones Móviles Multiplataforma</Text>
+                                        <Text style={styles.textGrupo}>TC1 2025A</Text>
+                                        <Text style={styles.textMateria}>Aplicaciones Móviles Multiplataforma</Text>
                                     </View>
                                 </ImageBackground>
                             </View>
-                            <View style={styles.materia2}>
-                                <ImageBackground source={materia2} style={styles.imgMateria2}>
+                            <View style={styles.materia}>
+                                <ImageBackground source={materia2} style={styles.imgMateria}>
                                     <View style={styles.overlaymateria}>
-                                        <Text style={styles.textGrupo2}>TC1 2025A</Text>
-                                        <Text style={styles.textMateria2}>Seguridad en las Aplicaciones de Software</Text>
+                                        <Text style={styles.textGrupo}>TC1 2025A</Text>
+                                        <Text style={styles.textMateria}>Seguridad en las Aplicaciones de Software</Text>
                                     </View>
                                 </ImageBackground>
                             </View>
@@ -54,22 +55,23 @@ const HomeAlumno = () => {
                     </ScrollView>
                 </View>
             </View>
+            {/* Container Eventos */}
             <View style={styles.containerMaterias}>
                 <View style={styles.materias}>
                     <Text style={styles.textMaterias}>Eventos</Text>
                     <ScrollView horizontal={true} style={{flexDirection:'row'}} showsHorizontalScrollIndicator={false}>
                         <View style={styles.dataMaterias}>
-                            <View style={styles.materia1}>
-                                <ImageBackground source={evento1} style={styles.imgMateria1}>
+                            <View style={styles.materia}>
+                                <ImageBackground source={evento1} style={styles.imgMateria}>
                                     <View style={styles.overlaymateria}>
-                                        <Text style={styles.textMateria1}>Expo vinculación 2025</Text>
+                                        <Text style={styles.textMateria}>Expo vinculación 2025</Text>
                                     </View>
                                 </ImageBackground>
                             </View>
-                            <View style={styles.materia2}>
-                                <ImageBackground source={evento2} style={styles.imgMateria2}>
+                            <View style={styles.materia}>
+                                <ImageBackground source={evento2} style={styles.imgMateria}>
                                     <View style={styles.overlaymateria}>
-                                        <Text style={styles.textMateria2}>Jornada Ambiental para crédito complementario</Text>
+                                        <Text style={styles.textMateria}>Jornada Ambiental para crédito complementario</Text>
                                     </View>
                                 </ImageBackground>
                             </View>
@@ -85,15 +87,15 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: "white",
-        paddingTop: 60
+        paddingTop: 25
     },
     search: {
         backgroundColor: "white",
-        width: 393,
-        height: 64,
+        width: 'auto',
+        height: 'auto',
         display: 'flex',
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 10,
+        paddingBottom: 10,
         paddingLeft: 10,
         paddingRight: 10,
         flexDirection: 'column',
@@ -128,24 +130,21 @@ const styles = StyleSheet.create({
         height: 28,
     },
     Title: {
-        width: 393,
+        width: 'auto',
         height: 81,
         flexShrink: 0,
         marginTop: 5
     },
     textTitle: {
         display: 'flex',
-        width: 393,
-        paddingTop: 8,
-        // paddingBottom: 0,
-        paddingLeft: 24,
-        paddingRight: 24,
+        width: 'auto',
+        marginTop: 8,
         flexDirection: 'column',
         alignItems: 'center',
         gap: 7
     },
     textFecha: {
-        alignSelf: 'stretch',
+        alignSelf: 'center',
         color: '#191919',
         textAlign: 'center',
         fontFamily: 'Roboto',
@@ -155,7 +154,7 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     textTitulo: {
-        alignSelf: 'stretch',
+        alignSelf: 'center',
         color: '#191919',
         textAlign: 'center',
         fontFamily: 'Roboto',
@@ -165,15 +164,15 @@ const styles = StyleSheet.create({
 
     },
     containerMaterias: {
-        width: 393,
+        width: 'auto',
         height: 266,
         flexShrink: 0,
         marginTop: 8,
     },
     materias: {
         display: 'flex',
-        width: 393,
-        height: 266,
+        width: 'auto',
+        height: 'auto',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 12
@@ -196,7 +195,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         flexDirection: 'row',
     },
-    materia1: {
+    materia: {
         display: 'flex',
         width: 324,
         height: 234,
@@ -205,7 +204,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 2,
     },
-    imgMateria1: {
+    imgMateria: {
         width: 324,
         height: 234,
         borderRadius: 30,
@@ -215,6 +214,7 @@ const styles = StyleSheet.create({
         gap: 2
     },
     overlaymateria: {
+        display: 'flex',
         width: 324,
         height: 234,
         borderRadius: 30,
@@ -223,29 +223,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 2
     },
-    materia2: {
-        display: 'flex',
-        width: 324,
-        height: 234,
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2,
-    },
-    imgMateria2: {
-        width: 324,
-        height: 234,
-        borderRadius: 30,
-        overflow: 'hidden',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2,
-        backgroundColor : '#fff',
-    },
-    textGrupo1: {
-        position: 'absolute',
-        top: 134,
-        width: 267,
+    textGrupo: {
+        position: 'flex',
+        width: 'auto',
+        height: 'auto',
         textAlign: 'center',
         fontFamily: 'Roboto',
         fontSize: 16,
@@ -255,43 +236,22 @@ const styles = StyleSheet.create({
         letterSpacing: -0.32,
         color: '#FFF'
     },
-    textMateria1: {
-        position: 'absolute',
-        top: 156,
-        width: 267,
+    textMateria: {
+        position: 'flex',
+        width: 'auto',
+        height: 'auto',
+        paddingBottom: 12,
+        paddingLeft: 12,
+        paddingRight: 12,
         textAlign: 'center',
         fontFamily: 'Roboto',
         fontSize: 28,
         fontStyle: 'normal',
         fontWeight: '600',
         letterSpacing: -0.32,
-        color: '#FFF'
-    },
-    textGrupo2: {
-        position: 'absolute',
-        top: 101,
-        width: 267,
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: '600',
-        lineHeight: 20,
-        letterSpacing: -0.32,
-        color: '#FFF'
-    },
-    textMateria2: {
-        position: 'absolute',
-        top: 123,
-        width: 267,
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 28,
-        fontStyle: 'normal',
-        fontWeight: '600',
-        letterSpacing: -0.32,
-        color: '#FFF'
-    },
+        color: '#FFF',
+        lineHeight: 28
+    }
 });
 
 export default HomeAlumno;
