@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto',
         fontSize: 16,
         fontStyle: 'normal',
-        fontWeight: '600',
+        fontWeight: 'bold',
         lineHeight: 20,
         textAlign: 'center'
     },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto',
         fontSize: 28,
         fontStyle: 'normal',
-        fontWeight: '600',
+        fontWeight: 'bold',
         letterSpacing: -0.32,
         color: '#FFF',
         lineHeight: 28
