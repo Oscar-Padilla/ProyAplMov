@@ -5,7 +5,7 @@ import materia2 from '../../assets/img/Materia2.png';
 import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
-const PerfilAlumno = () => {
+const CuentaAlumno = () => {
   const studentData = {
     name: "Fulanito Mengano",
     email: "20151714@aguascalientes.tecnm.mx",
@@ -372,4 +372,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PerfilAlumno;
+export default CuentaAlumno;
