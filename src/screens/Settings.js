@@ -1,9 +1,15 @@
 import { View, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { lockPortrait } from '../../assets/utils/orientationUtils';
 
 
 const Settings = () => {
+  useEffect(() => {
+    lockPortrait();
+  }, []);
+
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
@@ -19,14 +25,14 @@ const Settings = () => {
           >
             <Text style={styles.idiomaText}>Español (México)</Text>
             <Text style={styles.idiomaSubText}>Latinoamericano</Text>
-            {selectedLanguage === 'es-MX' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText}/>}
+            {selectedLanguage === 'es-MX' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText} />}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setSelectedLanguage('en-US')}
           >
             <Text style={styles.idiomaText}>Inglés (Estados Unidos)</Text>
             <Text style={styles.idiomaSubText}>Estados Unidos</Text>
-            {selectedLanguage === 'en-US' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText}/>}
+            {selectedLanguage === 'en-US' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText} />}
           </TouchableOpacity>
           <Text style={styles.idiomaTitle}>Aspecto</Text>
           <Text style={styles.aspectoText}>{isDarkMode ? 'Oscuro' : 'Claro'}</Text>

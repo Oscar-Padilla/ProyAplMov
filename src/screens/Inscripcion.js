@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Dimensions } from 'react-native';
+import { lockPortrait } from '../../assets/utils/orientationUtils'; // ajusta ruta
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useIsFocused } from '@react-navigation/native'; // 👈 IMPORTANTE
 
 export default function QRScannerScreen() {
+    useEffect(() => {
+        lockPortrait();
+    }, []);
+
+
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [qrData, setQrData] = useState('');
     const [cameraKey, setCameraKey] = useState(0);
+    const isFocused = useIsFocused(); // 👈 saber si esta pestaña está activa
 
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true);
@@ -31,7 +39,7 @@ export default function QRScannerScreen() {
 
     return (
         <View style={styles.container}>
-            {!scanned && (
+            {!scanned && isFocused && ( // 👈 solo monta la cámara si la pestaña está activa
                 <CameraView
                     key={cameraKey}
                     style={styles.camera}
@@ -41,7 +49,6 @@ export default function QRScannerScreen() {
                 />
             )}
 
-            {/* Overlay con diseño personalizado */}
             {!scanned && (
                 <View style={styles.overlay}>
                     <View style={styles.bgText}>
@@ -49,7 +56,6 @@ export default function QRScannerScreen() {
                     </View>
 
                     <View style={styles.scannerArea}>
-                        {/* Esquinas del marco */}
                         <View style={[styles.corner, styles.topLeft]} />
                         <View style={[styles.corner, styles.topRight]} />
                         <View style={[styles.corner, styles.bottomLeft]} />
@@ -77,26 +83,19 @@ const styles = StyleSheet.create({
         paddingTop: 80,
     },
     bgText: {
-        backgroundColor: 'black',
-        padding: 16,
-        borderRadius: 16,
-        marginBottom: 40,
+        backgroundColor: 'rgba(0, 0, 0, 0.50)',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 16,
-        backgroundColor: 'rgba(0, 0, 0, 0.50)', // semitransparente gris oscuro
         alignSelf: 'center',
         marginTop: 25,
-        marginBottom: 120
+        marginBottom: 120,
     },
     text: {
         color: '#fff',
         fontSize: 16,
         fontFamily: 'Roboto',
         fontWeight: '600',
-        fontStyle: 'normal',
-        lineHeight: 20,
-        letterSpacing: -0.2,
         textAlign: 'center',
     },
     scannerArea: {

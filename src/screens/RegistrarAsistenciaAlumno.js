@@ -1,121 +1,111 @@
-import { Text, Modal, View, TouchableOpacity, Image, StyleSheet, Animated } from "react-native";
-import Cerca from '../../assets/img/Cerca.png';
-import React, { useEffect, useRef } from 'react';
-import Feather from '@expo/vector-icons/Feather';
-import { useState } from 'react';
+import React, { useCallback } from 'react';
+import { View, Text, Image, StyleSheet, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import RegistraAsistenciaAlumno1 from "./RegistrarAsistenciaAlumno1";
+import { unlockOrientation, lockPortrait } from '../../assets/utils/orientationUtils';
+import Cerca from '../../assets/img/Cerca.png'; // Ajusta según tu estructura
 
-const RegistraAsistenciaAlumno = () => {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const [abrir, setAbrir] = useState(true);
+const RegistrarAsistenciaAlumno = () => {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
-    useFocusEffect(
-        React.useCallback(() => {
-          setAbrir(true);
-        }, [])
-      );
+  // Controlar orientación solo mientras esta pantalla está visible
+  useFocusEffect(
+    useCallback(() => {
+      unlockOrientation();
+      return () => {
+        lockPortrait();
+      };
+    }, [])
+  );
 
-        useEffect(() => {
-            if (abrir) {
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 100,
-                    useNativeDriver: true,
-                }).start();
-            } else {
-                Animated.timing(fadeAnim, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: true,
-                }).start();
-            }
-        }, [abrir]);
-    return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={abrir}
+  return (
+    <View
+      style={[
+        styles.container,
+        isLandscape && styles.containerLandscape,
+      ]}
+    >
+      <View
+        style={[
+          styles.contentWrapper,
+          isLandscape && styles.contentWrapperLandscape,
+        ]}
+      >
+        <Image
+          source={Cerca}
+          style={[
+            styles.cerca,
+            isLandscape && styles.cercaLandscape,
+          ]}
+        />
+
+        <View
+          style={[
+            styles.rightContent,
+            isLandscape && styles.rightContentLandscape,
+          ]}
         >
-            <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-                <View style={styles.overlay}>
-                    <View style={styles.modalContainer}>
-                        <TouchableOpacity onPress={() => setAbrir(false)} style={styles.closeButton}>
-                            <Feather name="x" size={30} color="white" />
-                        </TouchableOpacity>
-                        <Image source={Cerca} style={styles.cerca} />
-                        <View style={styles.text}>
-                            <Text style={styles.text1}>¡Estás cerca!</Text>
-                            <Text style={styles.text2}>Acércate a la ubicación para registrar tu asistencia</Text>
-                        </View>
-                        <RegistraAsistenciaAlumno1 />
-                    </View>
-                </View>
-            </Animated.View>
-        </Modal>
-    );
+          <Text style={styles.text1}>¡Estás cerca!</Text>
+          <Text style={styles.text2}>
+            Acércate a la ubicación para registrar tu asistencia
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
-    justifyContent: "flex-end", // Hace que el modal salga desde abajo
-    backgroundColor: "rgba(0,0,0,0.5)", // Oscurece el fondo
+    backgroundColor: '#EF5350',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
-  modalContainer: {
-    backgroundColor: "#EF5350",
-    width: "100%",
-    borderTopLeftRadius: 30, // Bordes redondeados arriba
-    borderTopRightRadius: 30,
-    padding: 20,
-    alignItems: "center",
-    height: "80%", // Ajusta la altura del modal
+  containerLandscape: {
+    paddingHorizontal: 40,
   },
-  closeButton: {
-    position: "absolute",
-    top: 18,
-    left: 18,
+  contentWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  title: {
-    fontFamily: 'Roboto',
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
+  contentWrapperLandscape: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
   },
   cerca: {
-    marginTop: 50,
+    width: 250,
+    height: 250,
+    resizeMode: 'contain',
+    marginBottom: 30,
   },
-  text:{
-    display: 'flex',
-    marginTop: 100,
-    width: 393,
-    paddingVertical: 24,
-    flexDirection: 'column',
-    justifyContent: 'center',
+  cercaLandscape: {
+    marginBottom: 0,
+    marginRight: 20,
+  },
+  rightContent: {
+    alignItems: 'center',
+  },
+  rightContentLandscape: {
     alignItems: 'flex-start',
-    gap: 14,
+    flex: 1,
   },
-  text1:{
-    width: 393,
+  text1: {
     color: '#D7FACB',
-    fontFamily: 'Roboto',
-    fontSize: 36,
-    fontStyle: 'normal',
-    fontWeight: 600,
-    // lineHeight: 40,
-    textAlign: 'center'
-  },
-  text2:{
-    width: 393,
-    color: '#D7FACB',
-    fontFamily: 'Roboto',
-    fontSize: 20,
-    fontStyle: 'normal',
-    fontWeight: 400,
-    // lineHeight: 40,
+    fontSize: 32,
+    fontWeight: 'bold',
     textAlign: 'center',
-    letterSpacing: -0.5
+    marginBottom: 12,
+  },
+  text2: {
+    color: '#D7FACB',
+    fontSize: 18,
+    textAlign: 'center',
+    paddingHorizontal: 10,
   },
 });
 
-export default RegistraAsistenciaAlumno;
+export default RegistrarAsistenciaAlumno;

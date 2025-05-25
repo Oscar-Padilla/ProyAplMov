@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
+import { lockPortrait } from '../../assets/utils/orientationUtils';
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
 import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
 const CuentaAlumno = () => {
+  useEffect(() => {
+    lockPortrait();
+  }, []);
+
+
   const studentData = {
     name: "Fulanito Mengano",
     email: "20151714@aguascalientes.tecnm.mx",

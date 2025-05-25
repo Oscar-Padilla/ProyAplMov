@@ -1,5 +1,6 @@
 import { Text, View, StyleSheet, TextInput, ScrollView, ImageBackground } from "react-native";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { lockPortrait } from '../../assets/utils/orientationUtils';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -7,6 +8,11 @@ import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
 const HomeAlumno = () => {
+    useEffect(() => {
+        lockPortrait();
+    }, []);
+
+
     const [text, setText] = useState("");
 
     return (

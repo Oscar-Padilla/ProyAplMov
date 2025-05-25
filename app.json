@@ -13,7 +13,7 @@
     "name": "ProyAplMov",
     "slug": "ProyAplMov",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/img/Logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,

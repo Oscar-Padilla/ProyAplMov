@@ -19,7 +19,6 @@ import Registrate3 from './src/screens/Registrate3';
 // Pantallas del TabNavigator (después de login)
 import HomeAlumno from './src/screens/HomeAlumno';
 import Inscripcion from './src/screens/Inscripcion';
-import InscripcionAlumnoMateria from './src/screens/InscripcionAlumnoMateria';
 import RegistrarAsistenciaAlumno from './src/screens/RegistrarAsistenciaAlumno';
 import Settings from './src/screens/Settings';
 import CuentaAlumno from './src/screens/CuentaAlumno';
@@ -46,7 +45,7 @@ function HomeTabs() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'white' } }}>
       <Tab.Screen
-        name="HomeAlumno"
+        name="HomeAlumnoTabs"
         component={HomeAlumno}
         options={{
           tabBarLabel: () => null,
@@ -68,7 +67,7 @@ function HomeTabs() {
         }}
       />
       <Tab.Screen
-        name="RegistrarAsistenciaAlumno" 
+        name="RegistrarAsistencia"
         component={RegistrarAsistenciaAlumno}
         options={{
           tabBarLabel: () => null,
