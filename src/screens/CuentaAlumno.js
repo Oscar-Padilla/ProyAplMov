@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
+import { useTheme } from '../context/ThemeContext'; // IMPORTANTE
+
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
 import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
 const CuentaAlumno = () => {
+  const { theme } = useTheme(); // USO DEL TEMA
   useEffect(() => {
     lockPortrait();
   }, []);
-
 
   const studentData = {
     name: "Fulanito Mengano",
@@ -30,63 +32,66 @@ const CuentaAlumno = () => {
       { id: '2', name: 'Jornada Ambiental para crédito complementario' }
     ]
   };
+
   const [selected, setSelected] = useState('materias');
 
   return (
-    <View style={styles.overlay}>
-      <ScrollView vertical={true} style={{ flexDirection: 'cloumn' }} showsVerticalScrollIndicator={false}>
-        <View style={styles.profileBg}>
-          <View style={styles.profileIcn}>
-            <Text style={styles.textProfile}>FM</Text>
+    <View style={[styles.overlay, { backgroundColor: theme.background }]}>
+      <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
+        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
+          <View style={[styles.profileIcn, { borderColor: theme.text }]}>
+            <Text style={[styles.textProfile, { color: '#fff' }]}>FM</Text>
           </View>
         </View>
         <View style={styles.infoProfile}>
           <View style={styles.infoName}>
-            <Text style={styles.textName}>
+            <Text style={[styles.textName, { color: theme.text }]}>
               {studentData.name}
             </Text>
           </View>
           <View style={styles.infoStats}>
-            <Text style={styles.textStats}>
+            <Text style={[styles.textStats, { color: theme.text }]}>
               {studentData.stats.materias} materias • {studentData.stats.eventos} eventos
             </Text>
           </View>
           <View style={styles.infoEmail}>
-            <Text style={styles.textEmail}>
+            <Text style={[styles.textEmail, { color: theme.text }]}>
               {studentData.email}
             </Text>
           </View>
           <View style={styles.infoRole}>
-            <Text style={styles.textRole}>
+            <Text style={[styles.textRole, { color: theme.text }]}>
               {studentData.role} • {studentData.career}
             </Text>
           </View>
         </View>
         <View style={styles.RatingAsistencias}>
-          <TouchableOpacity style={styles.btnRating}>
+          <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
             <Text style={styles.textRating}>Rating de asistencias</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.Selector}>
-          <TouchableOpacity style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn]} onPress={() => setSelected('materias')}>
-            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt]}>Materias</Text>
+          <TouchableOpacity
+            style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn, selected === 'materias' && { backgroundColor: theme.primary }]}
+            onPress={() => setSelected('materias')}
+          >
+            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'materias' && { color: '#fff' }]} >Materias</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.btnEventos, selected === 'eventos' && styles.activeBtn]} onPress={() => setSelected('eventos')}>
-            <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt]}>Eventos</Text>
+          <TouchableOpacity
+            style={[styles.btnEventos, selected === 'eventos' && styles.activeBtn, selected === 'eventos' && { backgroundColor: theme.primary }]}
+            onPress={() => setSelected('eventos')}
+          >
+            <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt, selected === 'eventos' && { color: '#fff' }]}>Eventos</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.content}>
           {selected === 'materias' ? (
-            <ScrollView
-              horizontal={true}
-              style={{ flexDirection: 'row' }}
-              showsHorizontalScrollIndicator={false}
-            >
+            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
                 {studentData.materias.map((materia, index) => (
                   <View key={materia.id} style={styles.materia}>
                     <ImageBackground
-                      source={index === 0 ? materia1 : materia2} // puedes mejorar esto con un arreglo de imágenes
+                      source={index === 0 ? materia1 : materia2}
                       style={styles.imgMateria}
                     >
                       <View style={styles.overlaymateria}>
@@ -99,16 +104,12 @@ const CuentaAlumno = () => {
               </View>
             </ScrollView>
           ) : (
-            <ScrollView
-              horizontal={true}
-              style={{ flexDirection: 'row' }}
-              showsHorizontalScrollIndicator={false}
-            >
+            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
                 {studentData.eventos.map((evento, index) => (
                   <View key={evento.id} style={styles.materia}>
                     <ImageBackground
-                      source={index === 0 ? evento1 : evento2} // igual que arriba, puedes usar un arreglo si hay más
+                      source={index === 0 ? evento1 : evento2}
                       style={styles.imgMateria}
                     >
                       <View style={styles.overlaymateria}>
@@ -121,14 +122,13 @@ const CuentaAlumno = () => {
             </ScrollView>
           )}
         </View>
-
       </ScrollView>
     </View>
-
   );
 };
 
 const styles = StyleSheet.create({
+  // [SIN CAMBIOS DE DISEÑO]
   overlay: {
     flex: 1,
     backgroundColor: "white",

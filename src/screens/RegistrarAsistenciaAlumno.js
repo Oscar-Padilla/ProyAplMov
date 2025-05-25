@@ -2,13 +2,17 @@ import React, { useCallback } from 'react';
 import { View, Text, Image, StyleSheet, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { unlockOrientation, lockPortrait } from '../../assets/utils/orientationUtils';
-import Cerca from '../../assets/img/Cerca.png'; // Ajusta según tu estructura
+import { useTheme } from '../context/ThemeContext';
+import Cerca from '../../assets/img/Cerca.png';
 
 const RegistrarAsistenciaAlumno = () => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const { theme, isDarkMode } = useTheme(); // ✅ Detectar modo
 
-  // Controlar orientación solo mientras esta pantalla está visible
+  const backgroundColor = isDarkMode ? '#1E1E1E' : '#EF5350';
+  const textColor = isDarkMode ? '#E0FFE3' : '#D7FACB';
+
   useFocusEffect(
     useCallback(() => {
       unlockOrientation();
@@ -23,6 +27,7 @@ const RegistrarAsistenciaAlumno = () => {
       style={[
         styles.container,
         isLandscape && styles.containerLandscape,
+        { backgroundColor },
       ]}
     >
       <View
@@ -45,8 +50,8 @@ const RegistrarAsistenciaAlumno = () => {
             isLandscape && styles.rightContentLandscape,
           ]}
         >
-          <Text style={styles.text1}>¡Estás cerca!</Text>
-          <Text style={styles.text2}>
+          <Text style={[styles.text1, { color: textColor }]}>¡Estás cerca!</Text>
+          <Text style={[styles.text2, { color: textColor }]}>
             Acércate a la ubicación para registrar tu asistencia
           </Text>
         </View>
@@ -58,7 +63,6 @@ const RegistrarAsistenciaAlumno = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EF5350',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -94,14 +98,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   text1: {
-    color: '#D7FACB',
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 12,
   },
   text2: {
-    color: '#D7FACB',
     fontSize: 18,
     textAlign: 'center',
     paddingHorizontal: 10,

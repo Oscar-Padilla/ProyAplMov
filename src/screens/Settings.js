@@ -1,66 +1,66 @@
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Switch, Modal } from "react-native";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { useState, useEffect } from 'react';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
+import { useTheme } from '../context/ThemeContext';
 
-const Settings = () => {
+const Settings = ({ navigation }) => {
+  const { isDarkMode, toggleTheme, theme } = useTheme();
+
   useEffect(() => {
     lockPortrait();
   }, []);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
-
-  const [modalContactoVisible, setModalContactoVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   return (
-    <View style={styles.overlay}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>Configuración</Text>
+    <View style={[styles.overlay, { backgroundColor: theme.background }]}>
+      <View style={[styles.modalContainer, { backgroundColor: theme.card }]}>
+        <Text style={[styles.title, { color: theme.text }]}>Configuración</Text>
         <View style={styles.forms}>
-          <Text style={styles.idiomaTitle}>Idioma</Text>
+          <Text style={[styles.idiomaTitle, { color: theme.text }]}>Idioma</Text>
           <TouchableOpacity onPress={() => setSelectedLanguage('es-MX')}>
-            <Text style={styles.idiomaText}>Español (México)</Text>
+            <Text style={[styles.idiomaText, { color: theme.text }]}>Español (México)</Text>
             <Text style={styles.idiomaSubText}>Latinoamericano</Text>
-            {selectedLanguage === 'es-MX' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText} />}
+            {selectedLanguage === 'es-MX' && <FontAwesome5 name="check" size={24} color={theme.text} style={styles.selectedText} />}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSelectedLanguage('en-US')}>
-            <Text style={styles.idiomaText}>Inglés (Estados Unidos)</Text>
+            <Text style={[styles.idiomaText, { color: theme.text }]}>Inglés (Estados Unidos)</Text>
             <Text style={styles.idiomaSubText}>Estados Unidos</Text>
-            {selectedLanguage === 'en-US' && <FontAwesome5 name="check" size={24} color="black" style={styles.selectedText} />}
+            {selectedLanguage === 'en-US' && <FontAwesome5 name="check" size={24} color={theme.text} style={styles.selectedText} />}
           </TouchableOpacity>
 
-          <Text style={styles.idiomaTitle}>Aspecto</Text>
-          <Text style={styles.aspectoText}>{isDarkMode ? 'Oscuro' : 'Claro'}</Text>
+          <Text style={[styles.idiomaTitle, { color: theme.text }]}>Aspecto</Text>
+          <Text style={[styles.aspectoText, { color: theme.text }]}>{isDarkMode ? 'Oscuro' : 'Claro'}</Text>
           <Switch
             style={styles.switch}
             trackColor={{ false: '#767577', true: '#49225B' }}
-            onValueChange={toggleSwitch}
+            onValueChange={toggleTheme}
             value={isDarkMode}
           />
         </View>
 
-        <TouchableOpacity style={styles.contactBtn} onPress={() => setModalContactoVisible(true)}>
+        <TouchableOpacity style={styles.contactBtn} onPress={() => setModalVisible(true)}>
           <Text style={styles.contactBtnText}>Contacto</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modal de Contacto */}
+      {/* ✅ Modal embebido de contacto */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalContactoVisible}
-        onRequestClose={() => setModalContactoVisible(false)}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalBackground}>
-          <View style={styles.contactModal}>
-            <Text style={styles.contactTitle}>Contacto</Text>
-            <Text style={styles.contactContent}>
+          <View style={[styles.contactModal, { backgroundColor: theme.card }]}>
+            <Text style={[styles.contactTitle, { color: theme.text }]}>Contacto</Text>
+            <Text style={[styles.contactContent, { color: theme.text }]}>
               Si tienes dudas o comentarios, contáctanos a:
             </Text>
-            <Text style={styles.contactEmail}>soporte@proxiclass.com</Text>
-            <TouchableOpacity onPress={() => setModalContactoVisible(false)} style={styles.closeModalBtn}>
+            <Text style={[styles.contactEmail, { color: theme.primary }]}>soporte@proxiclass.com</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeModalBtn}>
               <Text style={styles.closeModalText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -74,10 +74,8 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: "white",
   },
   modalContainer: {
-    backgroundColor: "white",
     width: "100%",
     padding: 20,
     alignItems: "center",
@@ -96,14 +94,12 @@ const styles = StyleSheet.create({
   },
   idiomaTitle: {
     alignSelf: 'stretch',
-    color: '#191919',
     fontSize: 16,
     fontWeight: '400',
     lineHeight: 20,
     letterSpacing: -0.32
   },
   idiomaText: {
-    color: '#191919',
     fontSize: 20,
     fontWeight: '600',
     letterSpacing: -0.5,
@@ -117,7 +113,6 @@ const styles = StyleSheet.create({
     marginBottom: 12
   },
   aspectoText: {
-    color: '#191919',
     fontSize: 20,
     fontWeight: '600',
     letterSpacing: -0.5,
@@ -131,8 +126,6 @@ const styles = StyleSheet.create({
     right: 10,
   },
   contactBtn: {
-    display: 'flex',
-    alignSelf: 'center',
     backgroundColor: '#49225B',
     paddingVertical: 12,
     paddingHorizontal: 20,
@@ -151,7 +144,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   contactModal: {
-    backgroundColor: 'white',
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
@@ -169,7 +161,6 @@ const styles = StyleSheet.create({
   contactEmail: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#49225B',
     marginBottom: 20,
   },
   closeModalBtn: {

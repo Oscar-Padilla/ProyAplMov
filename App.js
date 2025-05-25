@@ -1,5 +1,4 @@
 import React from 'react';
-import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,6 +7,8 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Octicons from '@expo/vector-icons/Octicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 // Pantallas del registro
 import IniciodeSesion from './src/screens/IniciodeSesion';
@@ -23,14 +24,13 @@ import RegistrarAsistenciaAlumno from './src/screens/RegistrarAsistenciaAlumno';
 import Settings from './src/screens/Settings';
 import CuentaAlumno from './src/screens/CuentaAlumno';
 
-// Creación de los navegadores
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Stack para las pantallas de registro
+// Stack de registro
 function RegistroStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'white' } }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="IniciodeSesion" component={IniciodeSesion} options={{ animation: 'slide_from_left' }} />
       <Stack.Screen name="Registrate" component={Registrate} options={{ animation: 'fade' }} />
       <Stack.Screen name="Registrate1" component={Registrate1} options={{ animation: 'fade', animationTypeForReplace: 'pop' }} />
@@ -40,28 +40,35 @@ function RegistroStack() {
   );
 }
 
-// TabNavigator para las pantallas del HomeAlumno
+// Tab de Home
 function HomeTabs() {
+  const { theme } = useTheme();
+
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'white' } }}>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: theme.card },
+      }}
+    >
       <Tab.Screen
         name="HomeAlumnoTabs"
         component={HomeAlumno}
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: ({ focused}) => {
-            const iconColor = focused ? 'black' : 'gray';
+          tabBarIcon: ({ focused }) => {
+            const iconColor = focused ? theme.primary : 'gray';
             return <Foundation name="home" size={30} color={iconColor} />;
           },
         }}
       />
-      <Tab.Screen 
-        name="Inscripcion" 
+      <Tab.Screen
+        name="Inscripcion"
         component={Inscripcion}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => {
-            const iconColor = focused ? 'black' : 'gray';
+            const iconColor = focused ? theme.primary : 'gray';
             return <FontAwesome5 name="plus" size={28} color={iconColor} />;
           },
         }}
@@ -72,29 +79,29 @@ function HomeTabs() {
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => {
-            const iconColor = focused ? '#49225B' : 'gray';
+            const iconColor = focused ? theme.primary : 'gray';
             return <Octicons name="check-circle-fill" size={28} color={iconColor} />;
           },
         }}
       />
-      <Tab.Screen 
-        name="Settings" 
-        component={Settings} 
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => {
-            const iconColor = focused ? 'black' : 'gray';
+            const iconColor = focused ? theme.primary : 'gray';
             return <MaterialCommunityIcons name="nut" size={30} color={iconColor} />;
           },
         }}
       />
-      <Tab.Screen 
-        name="CuentaAlumno" 
-        component={CuentaAlumno} 
+      <Tab.Screen
+        name="CuentaAlumno"
+        component={CuentaAlumno}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => {
-            const iconColor = focused ? 'black' : 'gray';
+            const iconColor = focused ? theme.primary : 'gray';
             return <FontAwesome6 name="user-large" size={24} color={iconColor} />;
           },
         }}
@@ -103,16 +110,29 @@ function HomeTabs() {
   );
 }
 
+// App principal
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'white' } }}>
-        {/* Stack de Registro */}
-        <Stack.Screen name="Registro" component={RegistroStack} />
+    <ThemeProvider>
+      <NavigationContainer>
+        <AppContent />
+      </NavigationContainer>
+    </ThemeProvider>
+  );
+}
 
-        {/* Home con TabNavigator */}
-        <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ animation: 'slide_from_right', gestureEnabled: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+function AppContent() {
+  const { theme } = useTheme();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.background },
+      }}
+    >
+      <Stack.Screen name="Registro" component={RegistroStack} />
+      <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ animation: 'slide_from_right', gestureEnabled: false }} />
+    </Stack.Navigator>
   );
 }
