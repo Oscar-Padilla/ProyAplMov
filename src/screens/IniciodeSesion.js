@@ -2,9 +2,17 @@ import { useState } from 'react';
 import { Button, Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import IniciodeSesion_1 from './IniciodeSesion_1';
 import logo from '../../assets/img/Logo.png';
+import { useUser } from '../context/UserContext'; // ✅ Agregado
 
 const IniciodeSesion = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const { setUsuario } = useUser(); // ✅ Contexto para guardar sesión
+
+  const handleLogin = (usuarioLogueado) => {
+    setUsuario(usuarioLogueado);
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.todo}>
       <View style={styles.container}>
@@ -24,7 +32,14 @@ const IniciodeSesion = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <IniciodeSesion_1 modalVisible={modalVisible} setModalVisible={setModalVisible} />
+
+        {/* ✅ Modal de login con función para guardar sesión */}
+        <IniciodeSesion_1
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          onLogin={handleLogin}
+        />
+
         <View style={styles.terms}>
           <View style={styles.termframe}>
             <Text style={styles.textterms}>
@@ -41,6 +56,8 @@ const IniciodeSesion = ({ navigation }) => {
     </View>
   );
 };
+
+export default IniciodeSesion;
 
 const styles = StyleSheet.create({
   todo: {
@@ -83,7 +100,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     paddingVertical: 0,
     paddingHorizontal: 0,
-    // paddingLeft: 10,
     flexDirection: 'column',
     alignItems: 'center',
     gap: 1,
@@ -154,6 +170,3 @@ const styles = StyleSheet.create({
     gap: 2
   }
 });
-
-
-export default IniciodeSesion;

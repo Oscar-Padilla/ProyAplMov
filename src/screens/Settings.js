@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Switch, Modal } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Switch, Modal, Alert } from "react-native";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext'; // ← importa el contexto
 
 const Settings = ({ navigation }) => {
   const { isDarkMode, toggleTheme, theme } = useTheme();
+  const { setUsuario } = useUser(); // ← usamos setUsuario para cerrar sesión
 
   useEffect(() => {
     lockPortrait();
@@ -14,10 +16,29 @@ const Settings = ({ navigation }) => {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const cerrarSesion = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que deseas cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar',
+          style: 'destructive',
+          onPress: async () => {
+            await setUsuario(null); // ← borra AsyncStorage y redirige automáticamente
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
       <View style={[styles.modalContainer, { backgroundColor: theme.card }]}>
         <Text style={[styles.title, { color: theme.text }]}>Configuración</Text>
+
         <View style={styles.forms}>
           <Text style={[styles.idiomaTitle, { color: theme.text }]}>Idioma</Text>
           <TouchableOpacity onPress={() => setSelectedLanguage('es-MX')}>
@@ -44,9 +65,14 @@ const Settings = ({ navigation }) => {
         <TouchableOpacity style={styles.contactBtn} onPress={() => setModalVisible(true)}>
           <Text style={styles.contactBtnText}>Contacto</Text>
         </TouchableOpacity>
+
+        {/* ✅ Botón de cerrar sesión */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={cerrarSesion}>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* ✅ Modal embebido de contacto */}
+      {/* Modal de contacto */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -69,6 +95,8 @@ const Settings = ({ navigation }) => {
     </View>
   );
 };
+
+export default Settings;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -137,6 +165,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600'
   },
+  logoutBtn: {
+    backgroundColor: '#c62828',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 100,
+    marginTop: 20,
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600'
+  },
   modalBackground: {
     flex: 1,
     justifyContent: 'center',
@@ -174,5 +214,3 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   }
 });
-
-export default Settings;

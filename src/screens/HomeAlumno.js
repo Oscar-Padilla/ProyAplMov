@@ -4,6 +4,8 @@ import { lockPortrait } from '../../assets/utils/orientationUtils';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../context/UserContext';
+import bd from '../../json/bd.json';
 
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -12,6 +14,7 @@ import evento2 from '../../assets/img/Evento2.png';
 
 const HomeAlumno = () => {
   const { theme } = useTheme();
+  const { usuario } = useUser();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -19,6 +22,15 @@ const HomeAlumno = () => {
   }, []);
 
   const [text, setText] = useState("");
+
+  const getFormattedDate = () => {
+    const fecha = new Date();
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const dia = fecha.getDate();
+    const mes = meses[fecha.getMonth()];
+    const anio = fecha.getFullYear();
+    return `${mes} ${dia}, ${anio}`;
+  };
 
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
@@ -37,7 +49,7 @@ const HomeAlumno = () => {
 
       <View style={styles.Title}>
         <View style={styles.textTitle}>
-          <Text style={[styles.textFecha, { color: theme.text }]}>Abr 16, 2025</Text>
+          <Text style={[styles.textFecha, { color: theme.text }]}>{getFormattedDate()}</Text>
           <Text style={[styles.textTitulo, { color: theme.text }]}>La inspiración de hoy</Text>
         </View>
       </View>
@@ -48,24 +60,22 @@ const HomeAlumno = () => {
           <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.dataMaterias}>
-              <TouchableOpacity onPress={() => navigation.navigate('MateriaAlumno')}>
-                <View style={styles.materia}>
-                  <ImageBackground source={materia1} style={styles.imgMateria}>
-                    <View style={styles.overlaymateria}>
-                      <Text style={styles.textGrupo}>TC1 2025A</Text>
-                      <Text style={styles.textMateria}>Aplicaciones Móviles Multiplataforma</Text>
+              {(usuario?.materiasInscritas || []).map((id, index) => {
+                const materia = bd.materias[id];
+                if (!materia) return null;
+                return (
+                  <TouchableOpacity key={id} onPress={() => navigation.navigate('MateriaAlumno')}>
+                    <View style={styles.materia}>
+                      <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
+                        <View style={styles.overlaymateria}>
+                          <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                          <Text style={styles.textMateria}>{materia.nombre}</Text>
+                        </View>
+                      </ImageBackground>
                     </View>
-                  </ImageBackground>
-                </View>
-              </TouchableOpacity>
-              <View style={styles.materia}>
-                <ImageBackground source={materia2} style={styles.imgMateria}>
-                  <View style={styles.overlaymateria}>
-                    <Text style={styles.textGrupo}>TC1 2025A</Text>
-                    <Text style={styles.textMateria}>Seguridad en las Aplicaciones de Software</Text>
-                  </View>
-                </ImageBackground>
-              </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </ScrollView>
         </View>
@@ -77,20 +87,19 @@ const HomeAlumno = () => {
           <Text style={[styles.textMaterias, { color: theme.text }]}>Eventos</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.dataMaterias}>
-              <View style={styles.materia}>
-                <ImageBackground source={evento1} style={styles.imgMateria}>
-                  <View style={styles.overlaymateria}>
-                    <Text style={styles.textMateria}>Expo vinculación 2025</Text>
+              {(usuario?.eventosInscritos || []).map((id, index) => {
+                const evento = bd.eventos[id];
+                if (!evento) return null;
+                return (
+                  <View key={id} style={styles.materia}>
+                    <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
+                      <View style={styles.overlaymateria}>
+                        <Text style={styles.textMateria}>{evento.nombre}</Text>
+                      </View>
+                    </ImageBackground>
                   </View>
-                </ImageBackground>
-              </View>
-              <View style={styles.materia}>
-                <ImageBackground source={evento2} style={styles.imgMateria}>
-                  <View style={styles.overlaymateria}>
-                    <Text style={styles.textMateria}>Jornada Ambiental para crédito complementario</Text>
-                  </View>
-                </ImageBackground>
-              </View>
+                );
+              })}
             </View>
           </ScrollView>
         </View>

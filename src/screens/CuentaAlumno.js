@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
-import { useTheme } from '../context/ThemeContext'; // IMPORTANTE
+import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
+import bd from '../../json/bd.json';
 
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -9,73 +11,64 @@ import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
 const CuentaAlumno = () => {
-  const { theme } = useTheme(); // USO DEL TEMA
+  const { theme } = useTheme();
+  const { usuario } = useUser();
+  const [selected, setSelected] = useState('materias');
+
   useEffect(() => {
     lockPortrait();
   }, []);
 
-  const studentData = {
-    name: "Fulanito Mengano",
-    email: "20151714@aguascalientes.tecnm.mx",
-    career: "Ingeniería En Tecnologías De La Información Y Comunicaciones",
-    role: "Estudiante",
-    stats: {
-      materias: 2,
-      eventos: 2
-    },
-    materias: [
-      { id: '1', name: 'Aplicaciones Móviles Multiplataforma', group: 'TC1 2025A' },
-      { id: '2', name: 'Seguridad en las Aplicaciones de Software', group: 'TC1 2025A' }
-    ],
-    eventos: [
-      { id: '1', name: 'Expo Vinculación 2025' },
-      { id: '2', name: 'Jornada Ambiental para crédito complementario' }
-    ]
-  };
+  const nombreCompleto = usuario?.nombre && usuario?.apellido
+    ? `${usuario.nombre} ${usuario.apellido}`
+    : usuario?.nombre || 'Usuario';
 
-  const [selected, setSelected] = useState('materias');
+  const iniciales = usuario?.nombre && usuario?.apellido
+    ? `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`
+    : 'US';
+
+  const totalMaterias = usuario?.materiasInscritas?.length || 0;
+  const totalEventos = usuario?.eventosInscritos?.length || 0;
 
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
         <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
           <View style={[styles.profileIcn, { borderColor: theme.background }]}>
-            <Text style={[styles.textProfile, { color: '#fff' }]}>FM</Text>
+            <Text style={[styles.textProfile, { color: '#fff' }]}>{iniciales}</Text>
           </View>
         </View>
         <View style={styles.infoProfile}>
           <View style={styles.infoName}>
-            <Text style={[styles.textName, { color: theme.text }]}>
-              {studentData.name}
-            </Text>
+            <Text style={[styles.textName, { color: theme.text }]}>{nombreCompleto}</Text>
           </View>
           <View style={styles.infoStats}>
             <Text style={[styles.textStats, { color: theme.text }]}>
-              {studentData.stats.materias} materias • {studentData.stats.eventos} eventos
+              {totalMaterias} materias • {totalEventos} eventos
             </Text>
           </View>
           <View style={styles.infoEmail}>
-            <Text style={[styles.textEmail, { color: theme.text }]}>
-              {studentData.email}
-            </Text>
+            <Text style={[styles.textEmail, { color: theme.text }]}>{usuario?.correo || 'correo@institucional.com'}</Text>
           </View>
           <View style={styles.infoRole}>
             <Text style={[styles.textRole, { color: theme.text }]}>
-              {studentData.role} • {studentData.career}
+              {usuario?.rol || 'Estudiante'} • {usuario?.carrera || 'Carrera no especificada'}
             </Text>
           </View>
         </View>
+
         <View style={styles.RatingAsistencias}>
           <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
             <Text style={styles.textRating}>Rating de asistencias</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.Selector}>
           <TouchableOpacity
             style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn, selected === 'materias' && { backgroundColor: theme.primary }]}
             onPress={() => setSelected('materias')}
           >
-            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'eventos'  && { color: theme.text }]} >Materias</Text>
+            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'eventos' && { color: theme.text }]}>Materias</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.btnEventos, selected === 'eventos' && styles.activeBtn, selected === 'eventos' && { backgroundColor: theme.primary }]}
@@ -84,40 +77,47 @@ const CuentaAlumno = () => {
             <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt, selected === 'materias' && { color: theme.text }]}>Eventos</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.content}>
           {selected === 'materias' ? (
             <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {studentData.materias.map((materia, index) => (
-                  <View key={materia.id} style={styles.materia}>
-                    <ImageBackground
-                      source={index === 0 ? materia1 : materia2}
-                      style={styles.imgMateria}
-                    >
-                      <View style={styles.overlaymateria}>
-                        <Text style={styles.textGrupo}>{materia.group}</Text>
-                        <Text style={styles.textMateria}>{materia.name}</Text>
-                      </View>
-                    </ImageBackground>
-                  </View>
-                ))}
+                {(usuario?.materiasInscritas || []).map((id, index) => {
+                  const materia = bd.materias[id];
+                  return (
+                    <View key={id} style={styles.materia}>
+                      <ImageBackground
+                        source={index % 2 === 0 ? materia1 : materia2}
+                        style={styles.imgMateria}
+                      >
+                        <View style={styles.overlaymateria}>
+                          <Text style={styles.textGrupo}>{materia?.grupo || 'Grupo no disponible'}</Text>
+                          <Text style={styles.textMateria}>{materia?.nombre || `Materia ${id}`}</Text>
+                        </View>
+                      </ImageBackground>
+                    </View>
+                  );
+                })}
               </View>
             </ScrollView>
           ) : (
             <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {studentData.eventos.map((evento, index) => (
-                  <View key={evento.id} style={styles.materia}>
-                    <ImageBackground
-                      source={index === 0 ? evento1 : evento2}
-                      style={styles.imgMateria}
-                    >
-                      <View style={styles.overlaymateria}>
-                        <Text style={styles.textMateria}>{evento.name}</Text>
-                      </View>
-                    </ImageBackground>
-                  </View>
-                ))}
+                {(usuario?.eventosInscritos || []).map((id, index) => {
+                  const evento = bd.eventos[id];
+                  return (
+                    <View key={id} style={styles.materia}>
+                      <ImageBackground
+                        source={index % 2 === 0 ? evento1 : evento2}
+                        style={styles.imgMateria}
+                      >
+                        <View style={styles.overlaymateria}>
+                          <Text style={styles.textMateria}>{evento?.nombre || `Evento ${id}`}</Text>
+                        </View>
+                      </ImageBackground>
+                    </View>
+                  );
+                })}
               </View>
             </ScrollView>
           )}

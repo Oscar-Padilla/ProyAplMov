@@ -13,6 +13,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { UserProvider, useUser } from './src/context/UserContext'; // ✅ Contexto de usuario
 
 // Pantallas del registro
 import IniciodeSesion from './src/screens/IniciodeSesion';
@@ -32,6 +33,7 @@ import MateriaAlumno from './src/screens/MateriaAlumno';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Stack que contiene la pantalla de inicio de sesión
 function RegistroStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -44,6 +46,7 @@ function RegistroStack() {
   );
 }
 
+// Pestañas principales de la app
 function HomeTabs() {
   const { theme } = useTheme();
 
@@ -108,13 +111,18 @@ function HomeTabs() {
   );
 }
 
+// Contenido principal de la app, según si hay sesión o no
 function AppContent() {
   const { theme, isDarkMode } = useTheme();
+  const { usuario, loading } = useUser();
 
-  // Cambia barra de navegación inferior (Android)
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(isDarkMode ? '#1E1E1E' : '#ffffff');
   }, [isDarkMode]);
+
+  if (loading) {
+    return null; // o un splash screen
+  }
 
   return (
     <>
@@ -128,20 +136,28 @@ function AppContent() {
           contentStyle: { backgroundColor: theme.background },
         }}
       >
-        <Stack.Screen name="Registro" component={RegistroStack} />
-        <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ gestureEnabled: false }} />
-        <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+        {usuario ? (
+          <>
+            <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ gestureEnabled: false }} />
+            <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+          </>
+        ) : (
+          <Stack.Screen name="Registro" component={RegistroStack} />
+        )}
       </Stack.Navigator>
     </>
   );
 }
 
+// App principal con todos los proveedores
 export default function App() {
   return (
     <ThemeProvider>
-      <NavigationContainer>
-        <AppContent />
-      </NavigationContainer>
+      <UserProvider>
+        <NavigationContainer>
+          <AppContent />
+        </NavigationContainer>
+      </UserProvider>
     </ThemeProvider>
   );
 }
