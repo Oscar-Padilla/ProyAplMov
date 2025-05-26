@@ -1,8 +1,9 @@
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Image, TextInput, Alert, Animated } from "react-native";
 import { useEffect, useRef, useState } from 'react';
-// import microsoft from '../../assets/img/ms_logo.png';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; // Ajusta la ruta según tu estructura
+
 import close from '../../assets/img/x.png';
-import usuariosData from '../../json/bd.json';
 
 const IniciodeSesion_1 = ({ modalVisible, setModalVisible, onLogin }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -25,21 +26,30 @@ const IniciodeSesion_1 = ({ modalVisible, setModalVisible, onLogin }) => {
     }
   }, [modalVisible]);
 
-  const handleLogin = () => {
-    const usuarios = usuariosData.usuarios;
+  const handleLogin = async () => {
+    try {
+      const usuariosRef = collection(db, 'usuarios');
+      const snapshot = await getDocs(usuariosRef);
 
-    const encontrado = Object.entries(usuarios).find(([uid, user]) => {
-      return user.correo === correo && user.contraseña === password;
-    });
+      let userFound = null;
+      snapshot.forEach(doc => {
+        const user = doc.data();
+        if (user.correo === correo && user.contraseña === password) {
+          userFound = { uid: doc.id, ...user };
+        }
+      });
 
-    if (encontrado) {
-      const [uid, user] = encontrado;
-      onLogin({ uid, ...user });
-      setModalVisible(false);
-      setCorreo('');
-      setPassword('');
-    } else {
-      Alert.alert('Error', 'Correo o contraseña incorrectos');
+      if (userFound) {
+        onLogin(userFound);
+        setModalVisible(false);
+        setCorreo('');
+        setPassword('');
+      } else {
+        Alert.alert('Error', 'Correo o contraseña incorrectos');
+      }
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      Alert.alert('Error', 'Hubo un problema al iniciar sesión');
     }
   };
 
@@ -70,7 +80,6 @@ const IniciodeSesion_1 = ({ modalVisible, setModalVisible, onLogin }) => {
             />
 
             <TouchableOpacity style={styles.microsoftButton} onPress={handleLogin}>
-              {/* <Image source={microsoft} style={styles.microsoftLogo} /> */}
               <Text style={styles.microsoftText}>Iniciar sesión</Text>
             </TouchableOpacity>
           </View>
@@ -131,11 +140,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     width: "100%",
     justifyContent: "center",
-  },
-  microsoftLogo: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
   },
   microsoftText: {
     fontFamily: 'Roboto',

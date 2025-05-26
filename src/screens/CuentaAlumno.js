@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
-import { lockPortrait } from '../../assets/utils/orientationUtils';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Modal, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
-import bd from '../../json/bd.json';
+import { lockPortrait } from '../../assets/utils/orientationUtils';
+import { db } from '../../firebaseConfig';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -15,9 +16,93 @@ const CuentaAlumno = () => {
   const { usuario } = useUser();
   const [selected, setSelected] = useState('materias');
 
+  const [materias, setMaterias] = useState([]);
+  const [eventos, setEventos] = useState([]);
+  const [loadingMaterias, setLoadingMaterias] = useState(true);
+  const [loadingEventos, setLoadingEventos] = useState(true);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [asistenciaStats, setAsistenciaStats] = useState({ porcentaje: 0, total: 0, asistencias: 0 });
+  const [cargandoAsistencia, setCargandoAsistencia] = useState(false);
+
   useEffect(() => {
     lockPortrait();
-  }, []);
+    if (usuario) {
+      fetchMaterias();
+      fetchEventos();
+    }
+  }, [usuario]);
+
+  const fetchMaterias = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'materias'));
+      const filtradas = snapshot.docs
+        .filter(doc => usuario.materiasInscritas?.includes(doc.id))
+        .map(doc => ({ id: doc.id, ...doc.data() }));
+      setMaterias(filtradas);
+    } catch (error) {
+      console.error('Error al cargar materias:', error);
+    } finally {
+      setLoadingMaterias(false);
+    }
+  };
+
+  const fetchEventos = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'eventos'));
+      const filtrados = snapshot.docs
+        .filter(doc => usuario.eventosInscritos?.includes(doc.id))
+        .map(doc => ({ id: doc.id, ...doc.data() }));
+      setEventos(filtrados);
+    } catch (error) {
+      console.error('Error al cargar eventos:', error);
+    } finally {
+      setLoadingEventos(false);
+    }
+  };
+
+  const abrirModalAsistencia = async () => {
+    setModalVisible(true);
+    setCargandoAsistencia(true);
+    try {
+      const [materiaSnap, eventoSnap] = await Promise.all([
+        getDocs(query(collection(db, 'asistencias_materia'), where('uid', '==', usuario.uid))),
+        getDocs(query(collection(db, 'asistencias_evento'), where('uid', '==', usuario.uid)))
+      ]);
+
+      const totalMaterias = materiaSnap.size;
+      const totalEventos = eventoSnap.size;
+
+      const presentesMaterias = materiaSnap.docs.filter(doc => doc.data().presente).length;
+      const presentesEventos = eventoSnap.docs.filter(doc => doc.data().presente).length;
+
+      const total = totalMaterias + totalEventos;
+      const asistencias = presentesMaterias + presentesEventos;
+
+      const porcentaje = total > 0 ? (asistencias / total) : 0;
+
+      setAsistenciaStats({ porcentaje, total, asistencias });
+    } catch (error) {
+      console.error('Error cargando asistencia:', error);
+    } finally {
+      setCargandoAsistencia(false);
+    }
+  };
+
+  const getFraseMotivadora = (porcentaje) => {
+    if (porcentaje >= 0.9) return "¡Excelente compromiso! 🔥";
+    if (porcentaje >= 0.7) return "¡Muy bien! Sigue así 💪";
+    if (porcentaje >= 0.5) return "Vas por buen camino 🌟";
+    return "¡Tú puedes mejorar! No te rindas 💡";
+  };
+
+  const BarraProgreso = ({ progreso }) => {
+    return (
+      <View style={{ width: '100%', backgroundColor: '#e0e0e0', borderRadius: 5, marginVertical: 10, height: 10 }}>
+        <View style={{ width: `${(progreso || 0.0001) * 100}%`, backgroundColor: '#6A1B9A', height: 10, borderRadius: 5 }} />
+      </View>
+    );
+  };
 
   const nombreCompleto = usuario?.nombre && usuario?.apellido
     ? `${usuario.nombre} ${usuario.apellido}`
@@ -32,37 +117,25 @@ const CuentaAlumno = () => {
 
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
-      <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
-          <View style={[styles.profileIcn, { borderColor: theme.background }]}>
+      <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
+        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>...
+          <View style={[styles.profileIcn, { borderColor: theme.background }]}>...
             <Text style={[styles.textProfile, { color: '#fff' }]}>{iniciales}</Text>
           </View>
         </View>
-        <View style={styles.infoProfile}>
-          <View style={styles.infoName}>
-            <Text style={[styles.textName, { color: theme.text }]}>{nombreCompleto}</Text>
-          </View>
-          <View style={styles.infoStats}>
-            <Text style={[styles.textStats, { color: theme.text }]}>
-              {totalMaterias} materias • {totalEventos} eventos
-            </Text>
-          </View>
-          <View style={styles.infoEmail}>
-            <Text style={[styles.textEmail, { color: theme.text }]}>{usuario?.correo || 'correo@institucional.com'}</Text>
-          </View>
-          <View style={styles.infoRole}>
-            <Text style={[styles.textRole, { color: theme.text }]}>
-              {usuario?.rol || 'Estudiante'} • {usuario?.carrera || 'Carrera no especificada'}
-            </Text>
-          </View>
+
+        <View style={styles.infoProfile}>...
+          <Text style={[styles.textName, { color: theme.text }]}>{nombreCompleto}</Text>
+          <Text style={[styles.textStats, { color: theme.text }]}>{totalMaterias} materias • {totalEventos} eventos</Text>
+          <Text style={[styles.textEmail, { color: theme.text }]}>{usuario?.correo || 'correo@institucional.com'}</Text>
+          <Text style={[styles.textRole, { color: theme.text }]}>{usuario?.rol || 'Estudiante'} • {usuario?.carrera || 'Carrera no especificada'}</Text>
         </View>
 
-        <View style={styles.RatingAsistencias}>
-          <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
+        <View style={styles.RatingAsistencias}>...
+          <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]} onPress={abrirModalAsistencia}>
             <Text style={styles.textRating}>Rating de asistencias</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.Selector}>
           <TouchableOpacity
             style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn, selected === 'materias' && { backgroundColor: theme.primary }]}
@@ -80,55 +153,81 @@ const CuentaAlumno = () => {
 
         <View style={styles.content}>
           {selected === 'materias' ? (
-            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {(usuario?.materiasInscritas || []).map((id, index) => {
-                  const materia = bd.materias[id];
-                  return (
-                    <View key={id} style={styles.materia}>
+                {loadingMaterias
+                  ? [1, 2].map((_, i) => (
+                    <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
+                  ))
+                  : materias.map((materia, index) => (
+                    <View key={materia.id} style={styles.materia}>
                       <ImageBackground
                         source={index % 2 === 0 ? materia1 : materia2}
                         style={styles.imgMateria}
                       >
                         <View style={styles.overlaymateria}>
-                          <Text style={styles.textGrupo}>{materia?.grupo || 'Grupo no disponible'}</Text>
-                          <Text style={styles.textMateria}>{materia?.nombre || `Materia ${id}`}</Text>
+                          <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                          <Text style={styles.textMateria}>{materia.nombre}</Text>
                         </View>
                       </ImageBackground>
                     </View>
-                  );
-                })}
+                  ))}
               </View>
             </ScrollView>
           ) : (
-            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {(usuario?.eventosInscritos || []).map((id, index) => {
-                  const evento = bd.eventos[id];
-                  return (
-                    <View key={id} style={styles.materia}>
+                {loadingEventos
+                  ? [1, 2].map((_, i) => (
+                    <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
+                  ))
+                  : eventos.map((evento, index) => (
+                    <View key={evento.id} style={styles.materia}>
                       <ImageBackground
                         source={index % 2 === 0 ? evento1 : evento2}
                         style={styles.imgMateria}
                       >
                         <View style={styles.overlaymateria}>
-                          <Text style={styles.textMateria}>{evento?.nombre || `Evento ${id}`}</Text>
+                          <Text style={styles.textMateria}>{evento.nombre}</Text>
                         </View>
                       </ImageBackground>
                     </View>
-                  );
-                })}
+                  ))}
               </View>
             </ScrollView>
           )}
         </View>
+
       </ScrollView>
+
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={modalStyles.overlay}>
+          <View style={modalStyles.container}>
+            {cargandoAsistencia ? (
+              <Text style={modalStyles.text}>Cargando estadísticas...</Text>
+            ) : (
+              <>
+                <Text style={modalStyles.porcentaje}>
+                  {Math.round(asistenciaStats.porcentaje * 100)}% de asistencia
+                </Text>
+                <BarraProgreso progreso={asistenciaStats.porcentaje} />
+                <Text style={modalStyles.text}>
+                  Has asistido a {asistenciaStats.asistencias} de {asistenciaStats.total} sesiones
+                </Text>
+                <Text style={modalStyles.mensaje}>{getFraseMotivadora(asistenciaStats.porcentaje)}</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={modalStyles.cerrarBtn}>
+                  <Text style={modalStyles.cerrarText}>Cerrar</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  // [SIN CAMBIOS DE DISEÑO]
   overlay: {
     flex: 1,
     backgroundColor: "white",
@@ -376,6 +475,53 @@ const styles = StyleSheet.create({
   activeTxt: {
     color: '#fff',
   }
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    gap: 12,
+  },
+  porcentaje: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#6A1B9A',
+    marginBottom: 5,
+  },
+  text: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  mensaje: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    color: '#6A1B9A',
+    textAlign: 'center',
+  },
+  cerrarBtn: {
+    marginTop: 20,
+    backgroundColor: '#6A1B9A',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 30,
+  },
+  cerrarText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default CuentaAlumno;

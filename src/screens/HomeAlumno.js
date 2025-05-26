@@ -5,7 +5,8 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../context/UserContext';
-import bd from '../../json/bd.json';
+import { db } from '../../firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
 
 import materia1 from '../../assets/img/Materia1.png';
 import materia2 from '../../assets/img/Materia2.png';
@@ -17,11 +18,47 @@ const HomeAlumno = () => {
   const { usuario } = useUser();
   const navigation = useNavigation();
 
+  const [text, setText] = useState('');
+  const [materias, setMaterias] = useState([]);
+  const [eventos, setEventos] = useState([]);
+  const [cargandoMaterias, setCargandoMaterias] = useState(true);
+  const [cargandoEventos, setCargandoEventos] = useState(true);
+
   useEffect(() => {
     lockPortrait();
-  }, []);
+    if (usuario) {
+      cargarMaterias();
+      cargarEventos();
+    }
+  }, [usuario]);
 
-  const [text, setText] = useState("");
+  const cargarMaterias = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "materias"));
+      const materiasInscritas = snapshot.docs
+        .filter(doc => usuario.materiasInscritas?.includes(doc.id))
+        .map(doc => ({ id: doc.id, ...doc.data() }));
+      setMaterias(materiasInscritas);
+    } catch (error) {
+      console.error("Error cargando materias:", error);
+    } finally {
+      setCargandoMaterias(false);
+    }
+  };
+
+  const cargarEventos = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "eventos"));
+      const eventosInscritos = snapshot.docs
+        .filter(doc => usuario.eventosInscritos?.includes(doc.id))
+        .map(doc => ({ id: doc.id, ...doc.data() }));
+      setEventos(eventosInscritos);
+    } catch (error) {
+      console.error("Error cargando eventos:", error);
+    } finally {
+      setCargandoEventos(false);
+    }
+  };
 
   const getFormattedDate = () => {
     const fecha = new Date();
@@ -54,17 +91,21 @@ const HomeAlumno = () => {
         </View>
       </View>
 
-      {/* Container Materias */}
+      {/* Materias */}
       <View style={styles.containerMaterias}>
         <View style={styles.materias}>
           <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.dataMaterias}>
-              {(usuario?.materiasInscritas || []).map((id, index) => {
-                const materia = bd.materias[id];
-                if (!materia) return null;
-                return (
-                  <TouchableOpacity key={id} onPress={() => navigation.navigate('MateriaAlumno')}>
+            {cargandoMaterias ? (
+              <View style={styles.dataMaterias}>
+                {[1, 2].map((_, i) => (
+                  <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.dataMaterias}>
+                {materias.map((materia, index) => (
+                  <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno')}>
                     <View style={styles.materia}>
                       <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
                         <View style={styles.overlaymateria}>
@@ -74,33 +115,37 @@ const HomeAlumno = () => {
                       </ImageBackground>
                     </View>
                   </TouchableOpacity>
-                );
-              })}
-            </View>
+                ))}
+              </View>
+            )}
           </ScrollView>
         </View>
       </View>
 
-      {/* Container Eventos */}
+      {/* Eventos */}
       <View style={styles.containerMaterias}>
         <View style={styles.materias}>
           <Text style={[styles.textMaterias, { color: theme.text }]}>Eventos</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.dataMaterias}>
-              {(usuario?.eventosInscritos || []).map((id, index) => {
-                const evento = bd.eventos[id];
-                if (!evento) return null;
-                return (
-                  <View key={id} style={styles.materia}>
+            {cargandoEventos ? (
+              <View style={styles.dataMaterias}>
+                {[1, 2].map((_, i) => (
+                  <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.dataMaterias}>
+                {eventos.map((evento, index) => (
+                  <View key={evento.id} style={styles.materia}>
                     <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
                       <View style={styles.overlaymateria}>
                         <Text style={styles.textMateria}>{evento.nombre}</Text>
                       </View>
                     </ImageBackground>
                   </View>
-                );
-              })}
-            </View>
+                ))}
+              </View>
+            )}
           </ScrollView>
         </View>
       </View>
