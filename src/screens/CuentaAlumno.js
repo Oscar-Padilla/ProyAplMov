@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { db } from '../../firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 import materia1 from '../../assets/img/Materia1.png';
@@ -15,6 +16,7 @@ const CuentaAlumno = () => {
   const { theme } = useTheme();
   const { usuario } = useUser();
   const [selected, setSelected] = useState('materias');
+  const navigation = useNavigation();
 
   const [materias, setMaterias] = useState([]);
   const [eventos, setEventos] = useState([]);
@@ -160,17 +162,19 @@ const CuentaAlumno = () => {
                     <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
                   ))
                   : materias.map((materia, index) => (
-                    <View key={materia.id} style={styles.materia}>
-                      <ImageBackground
-                        source={index % 2 === 0 ? materia1 : materia2}
-                        style={styles.imgMateria}
-                      >
-                        <View style={styles.overlaymateria}>
-                          <Text style={styles.textGrupo}>{materia.grupo}</Text>
-                          <Text style={styles.textMateria}>{materia.nombre}</Text>
-                        </View>
-                      </ImageBackground>
-                    </View>
+                    <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno', { idMateria: materia.id })}>
+                      <View key={materia.id} style={styles.materia}>
+                        <ImageBackground
+                          source={index % 2 === 0 ? materia1 : materia2}
+                          style={styles.imgMateria}
+                        >
+                          <View style={styles.overlaymateria}>
+                            <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                            <Text style={styles.textMateria}>{materia.nombre}</Text>
+                          </View>
+                        </ImageBackground>
+                      </View>
+                    </TouchableOpacity>
                   ))}
               </View>
             </ScrollView>

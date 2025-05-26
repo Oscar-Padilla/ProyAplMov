@@ -57,6 +57,17 @@ function HomeAlumnoStack() {
   );
 }
 
+function CuentaAlumnoStack() {
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CuentaAlumno" component={CuentaAlumno} />
+      <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+    </Stack.Navigator>
+  );
+}
+
 // Pestañas principales de la app
 function HomeTabs() {
   const { theme } = useTheme();
@@ -109,8 +120,8 @@ function HomeTabs() {
         }}
       />
       <Tab.Screen
-        name="CuentaAlumno"
-        component={CuentaAlumno}
+        name="CuentaAlumnoTabs"
+        component={CuentaAlumnoStack}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
