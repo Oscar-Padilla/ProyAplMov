@@ -1,42 +1,46 @@
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import left from '../../assets/img/CaretLeft.png';
-import { useState} from 'react';
+import { useState } from 'react';
 
 
-const Registrate2 = ({navigation}) => {
+const Registrate2 = ({ navigation, route }) => {
   const [text, setText] = useState("");
   const paginaActual = 3;
   const totalPaginas = 4;
   const progreso = paginaActual / totalPaginas;
-  
+
   return (
     <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <TouchableOpacity onPress={() => navigation.goBack("Registrate1")} style={styles.closeButton}>
-              <Image source={left} style={styles.closeText} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Regístrate</Text>
-          <View style={styles.forms}>
-            <Text style={styles.correoText}>¿Cuál es tu nombre?</Text>
-            <TextInput 
-              style={styles.inputCorreo}
-              placeholder="Nombre"
-              placeholderTextColor={'#A5A5A5'}
-              value={text}
-              onChangeText={setText}
-            />
-          </View>
-          <View style={styles.bottomThing}>
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBarBackground} />
-              <View style={[styles.progressBarFill, {width: `${progreso * 100}%`}]}/>
-              <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
-            </View>
-            <TouchableOpacity onPress={() => navigation.navigate("Registrate3")} style={styles.btnNext} >
-                <Text style={styles.text}>Siguiente</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.modalContainer}>
+        <TouchableOpacity onPress={() => navigation.goBack("Registrate1")} style={styles.closeButton}>
+          <Image source={left} style={styles.closeText} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Regístrate</Text>
+        <View style={styles.forms}>
+          <Text style={styles.correoText}>¿Cuál es tu nombre?</Text>
+          <TextInput
+            style={styles.inputCorreo}
+            placeholder="Nombre"
+            placeholderTextColor={'#A5A5A5'}
+            value={text}
+            onChangeText={setText}
+          />
         </View>
+        <View style={styles.bottomThing}>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBarBackground} />
+            <View style={[styles.progressBarFill, { width: `${progreso * 100}%` }]} />
+            <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate("Registrate3", {
+            correo: route.params?.correo,
+            contraseña: route.params?.contraseña,
+            nombre: text
+          })} style={styles.btnNext} >
+            <Text style={styles.text}>Siguiente</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
-  inputCorreo:{
+  inputCorreo: {
     fontSize: 28,
     paddingVertical: 8,
   },

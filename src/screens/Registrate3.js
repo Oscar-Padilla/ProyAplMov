@@ -1,42 +1,80 @@
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import left from '../../assets/img/CaretLeft.png';
-import { useState} from 'react';
+import { useState } from 'react';
+import { db } from '../../firebaseConfig';
+import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
+const Registrate3 = () => {
+  const [apellido, setApellido] = useState("");
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { correo, contraseña, nombre } = route.params || {};
 
-const Registrate3 = ({navigation}) => {
-  const [text, setText] = useState("");
   const paginaActual = 4;
   const totalPaginas = 4;
   const progreso = paginaActual / totalPaginas;
-  
+
+  const registrarNuevoUsuario = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'usuarios'));
+
+      const uids = snapshot.docs
+        .map(d => d.id)
+        .filter(id => id.startsWith('uid_alumno_'))
+        .map(id => parseInt(id.replace('uid_alumno_', '')))
+        .filter(n => !isNaN(n));
+
+      const siguienteNumero = uids.length > 0 ? Math.max(...uids) + 1 : 1;
+      const nuevoUID = `uid_alumno_${siguienteNumero}`;
+
+      const nuevoUsuario = {
+        correo,
+        contraseña,
+        nombre,
+        apellido,
+        rol: 'Externo'
+      };
+
+      await setDoc(doc(db, 'usuarios', nuevoUID), nuevoUsuario);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'IniciodeSesion' }],
+      });
+    } catch (error) {
+      console.error('Error al registrar usuario externo:', error);
+    }
+  };
+
   return (
     <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <TouchableOpacity onPress={() => navigation.goBack("Registrate2")} style={styles.closeButton}>
-              <Image source={left} style={styles.closeText} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Regístrate</Text>
-          <View style={styles.forms}>
-            <Text style={styles.correoText}>¿Cuál es tu apellido?</Text>
-            <TextInput 
-              style={styles.inputCorreo}
-              placeholder="Apellido"
-              placeholderTextColor={'#A5A5A5'}
-              value={text}
-              onChangeText={setText}
-            />
-          </View>
-          <View style={styles.bottomThing}>
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBarBackground} />
-              <View style={[styles.progressBarFill, {width: `${progreso * 100}%`}]}/>
-              <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
-            </View>
-            <TouchableOpacity onPress={() => navigation.navigate("HomeAlumno")} style={styles.btnNext} >
-                <Text style={styles.text}>Siguiente</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.modalContainer}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+          <Image source={left} style={styles.closeText} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Regístrate</Text>
+        <View style={styles.forms}>
+          <Text style={styles.correoText}>¿Cuál es tu apellido?</Text>
+          <TextInput
+            style={styles.inputCorreo}
+            placeholder="Apellido"
+            placeholderTextColor={'#A5A5A5'}
+            value={apellido}
+            onChangeText={setApellido}
+          />
         </View>
+        <View style={styles.bottomThing}>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBarBackground} />
+            <View style={[styles.progressBarFill, { width: `${progreso * 100}%` }]} />
+            <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
+          </View>
+          <TouchableOpacity onPress={registrarNuevoUsuario} style={styles.btnNext}>
+            <Text style={styles.text}>Finalizar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -63,7 +101,7 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 20,
     alignItems: "center",
-    height: "88%", // Ajusta la altura del modal
+    height: "88%",
   },
   closeButton: {
     position: "absolute",
@@ -84,7 +122,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
-  inputCorreo:{
+  inputCorreo: {
     fontSize: 28,
     paddingVertical: 8,
   },

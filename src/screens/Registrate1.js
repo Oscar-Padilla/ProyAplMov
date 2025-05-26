@@ -1,57 +1,60 @@
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import left from '../../assets/img/CaretLeft.png';
-import { useState} from 'react';
+import { useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 
-const Registrate = ({navigation}) => {
+const Registrate1 = ({ navigation, route }) => {
   const [passw, setPassw] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const paginaActual = 2;
   const totalPaginas = 4;
   const progreso = paginaActual / totalPaginas;
-  
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-            <View style={styles.overlay}>
-                <View style={styles.modalContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate("Registrate")} style={styles.closeButton}>
-                    <Image source={left} style={styles.closeText} />
-                </TouchableOpacity>
-                <Text style={styles.title}>Regístrate</Text>
-                <View style={styles.forms}>
-                    <Text style={styles.passwText}>Crea una contraseña</Text>
-                    <TextInput 
-                    style={styles.inputPassw}
-                    placeholder="Contraseña"
-                    placeholderTextColor={'#A5A5A5'}
-                    value={passw}
-                    onChangeText={setPassw}
-                    secureTextEntry={!isPasswordVisible}
-                    />
-                    {passw.length > 0 && (
-                        <TouchableOpacity onPress={() => setPassw("")} style={styles.clearButton}>
-                            <AntDesign name="closecircle" size={28} color="#CDCDCD" />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity style={styles.checkboxPassw} onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                        <View style={[styles.checkbox, isPasswordVisible && styles.checkboxChecked]} />
-                        <Text style={styles.checkboxText}>Mostrar contraseña</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.bottomThing}>
-                    <View style={styles.progressContainer}>
-                    <View style={styles.progressBarBackground} />
-                    <View style={[styles.progressBarFill, {width: `${progreso * 100}%`}]}/>
-                    <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => navigation.navigate("Registrate2")} style={styles.btnNext} >
-                                    <Text style={styles.text}>Siguiente</Text>
-                                </TouchableOpacity>
-                </View>
-                </View>
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("Registrate")} style={styles.closeButton}>
+            <Image source={left} style={styles.closeText} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Regístrate</Text>
+          <View style={styles.forms}>
+            <Text style={styles.passwText}>Crea una contraseña</Text>
+            <TextInput
+              style={styles.inputPassw}
+              placeholder="Contraseña"
+              placeholderTextColor={'#A5A5A5'}
+              value={passw}
+              onChangeText={setPassw}
+              secureTextEntry={!isPasswordVisible}
+            />
+            {passw.length > 0 && (
+              <TouchableOpacity onPress={() => setPassw("")} style={styles.clearButton}>
+                <AntDesign name="closecircle" size={28} color="#CDCDCD" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.checkboxPassw} onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+              <View style={[styles.checkbox, isPasswordVisible && styles.checkboxChecked]} />
+              <Text style={styles.checkboxText}>Mostrar contraseña</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.bottomThing}>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBarBackground} />
+              <View style={[styles.progressBarFill, { width: `${progreso * 100}%` }]} />
+              <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
             </View>
+            <TouchableOpacity onPress={() => navigation.navigate("Registrate2", {
+              correo: route.params?.correo,
+              contraseña: passw
+            })} style={styles.btnNext} >
+              <Text style={styles.text}>Siguiente</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -109,7 +112,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
-  inputPassw:{
+  inputPassw: {
     color: '#191919',
     fontFamily: 'Roboto',
     fontSize: 28,
@@ -203,4 +206,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Registrate;
+export default Registrate1;

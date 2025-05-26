@@ -90,65 +90,78 @@ const HomeAlumno = () => {
           <Text style={[styles.textTitulo, { color: theme.text }]}>La inspiración de hoy</Text>
         </View>
       </View>
-
-      {/* Materias */}
-      <View style={styles.containerMaterias}>
-        <View style={styles.materias}>
-          <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {cargandoMaterias ? (
-              <View style={styles.dataMaterias}>
-                {[1, 2].map((_, i) => (
-                  <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
-                ))}
-              </View>
-            ) : (
-              <View style={styles.dataMaterias}>
-                {materias.map((materia, index) => (
-                  <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno')}>
-                    <View style={styles.materia}>
-                      <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
-                        <View style={styles.overlaymateria}>
-                          <Text style={styles.textGrupo}>{materia.grupo}</Text>
-                          <Text style={styles.textMateria}>{materia.nombre}</Text>
-                        </View>
-                      </ImageBackground>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </ScrollView>
+      {!cargandoMaterias && !cargandoEventos && materias.length === 0 && eventos.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.emptyTitle, { color: theme.text }]}>
+            No estás inscrito a ninguna materia o evento.
+          </Text>
+          <Text style={styles.emptySubtitle}>
+            Cuando te inscribas, aparecerán aquí.
+          </Text>
         </View>
-      </View>
-
-      {/* Eventos */}
-      <View style={styles.containerMaterias}>
-        <View style={styles.materias}>
-          <Text style={[styles.textMaterias, { color: theme.text }]}>Eventos</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {cargandoEventos ? (
-              <View style={styles.dataMaterias}>
-                {[1, 2].map((_, i) => (
-                  <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
-                ))}
-              </View>
-            ) : (
-              <View style={styles.dataMaterias}>
-                {eventos.map((evento, index) => (
-                  <View key={evento.id} style={styles.materia}>
-                    <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
-                      <View style={styles.overlaymateria}>
-                        <Text style={styles.textMateria}>{evento.nombre}</Text>
-                      </View>
-                    </ImageBackground>
+      ) : (
+        <>
+          { }
+          <View style={styles.containerMaterias}>
+            <View style={styles.materias}>
+              <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {cargandoMaterias ? (
+                  <View style={styles.dataMaterias}>
+                    {[1, 2].map((_, i) => (
+                      <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
+                    ))}
                   </View>
-                ))}
-              </View>
-            )}
-          </ScrollView>
-        </View>
-      </View>
+                ) : (
+                  <View style={styles.dataMaterias}>
+                    {materias.map((materia, index) => (
+                      <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno')}>
+                        <View style={styles.materia}>
+                          <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                              <Text style={styles.textMateria}>{materia.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+
+          {/* Eventos */}
+          <View style={styles.containerMaterias}>
+            <View style={styles.materias}>
+              <Text style={[styles.textMaterias, { color: theme.text }]}>Eventos</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {cargandoEventos ? (
+                  <View style={styles.dataMaterias}>
+                    {[1, 2].map((_, i) => (
+                      <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
+                    ))}
+                  </View>
+                ) : (
+                  <View style={styles.dataMaterias}>
+                    {eventos.map((evento, index) => (
+                      <View key={evento.id} style={styles.materia}>
+                        <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
+                          <View style={styles.overlaymateria}>
+                            <Text style={styles.textMateria}>{evento.nombre}</Text>
+                          </View>
+                        </ImageBackground>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </>
+      )}
+
     </View>
   );
 };
@@ -258,6 +271,24 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     paddingBottom: 12,
     paddingHorizontal: 12,
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center',
   },
 });
