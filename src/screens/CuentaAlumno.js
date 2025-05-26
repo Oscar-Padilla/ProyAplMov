@@ -118,20 +118,20 @@ const CuentaAlumno = () => {
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
       <ScrollView vertical={true} showsVerticalScrollIndicator={false}>
-        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>...
-          <View style={[styles.profileIcn, { borderColor: theme.background }]}>...
+        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
+          <View style={[styles.profileIcn, { borderColor: theme.background }]}>
             <Text style={[styles.textProfile, { color: '#fff' }]}>{iniciales}</Text>
           </View>
         </View>
 
-        <View style={styles.infoProfile}>...
+        <View style={styles.infoProfile}>
           <Text style={[styles.textName, { color: theme.text }]}>{nombreCompleto}</Text>
           <Text style={[styles.textStats, { color: theme.text }]}>{totalMaterias} materias • {totalEventos} eventos</Text>
           <Text style={[styles.textEmail, { color: theme.text }]}>{usuario?.correo || 'correo@institucional.com'}</Text>
           <Text style={[styles.textRole, { color: theme.text }]}>{usuario?.rol || 'Estudiante'} • {usuario?.carrera || 'Carrera no especificada'}</Text>
         </View>
 
-        <View style={styles.RatingAsistencias}>...
+        <View style={styles.RatingAsistencias}>
           <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]} onPress={abrirModalAsistencia}>
             <Text style={styles.textRating}>Rating de asistencias</Text>
           </TouchableOpacity>
@@ -201,21 +201,21 @@ const CuentaAlumno = () => {
       </ScrollView>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={modalStyles.overlay}>
-          <View style={modalStyles.container}>
+        <View style={[modalStyles.overlay, { backgroundColor: theme.mode === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.6)' }]}>
+          <View style={[modalStyles.container, { backgroundColor: theme.card || '#fff' }]}>
             {cargandoAsistencia ? (
-              <Text style={modalStyles.text}>Cargando estadísticas...</Text>
+              <Text style={[modalStyles.text, { color: theme.text }]}>Cargando estadísticas...</Text>
             ) : (
               <>
-                <Text style={modalStyles.porcentaje}>
+                <Text style={[modalStyles.porcentaje, { color: theme.primary }]}>
                   {Math.round(asistenciaStats.porcentaje * 100)}% de asistencia
                 </Text>
                 <BarraProgreso progreso={asistenciaStats.porcentaje} />
-                <Text style={modalStyles.text}>
+                <Text style={[modalStyles.text, { color: theme.text }]}>
                   Has asistido a {asistenciaStats.asistencias} de {asistenciaStats.total} sesiones
                 </Text>
-                <Text style={modalStyles.mensaje}>{getFraseMotivadora(asistenciaStats.porcentaje)}</Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)} style={modalStyles.cerrarBtn}>
+                <Text style={[modalStyles.mensaje, { color: theme.primary }]}>{getFraseMotivadora(asistenciaStats.porcentaje)}</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={[modalStyles.cerrarBtn, { backgroundColor: theme.primary }]}>
                   <Text style={modalStyles.cerrarText}>Cerrar</Text>
                 </TouchableOpacity>
               </>
@@ -515,7 +515,7 @@ const modalStyles = StyleSheet.create({
     backgroundColor: '#6A1B9A',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 30,
+    borderRadius: 100,
   },
   cerrarText: {
     color: '#fff',
