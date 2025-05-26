@@ -46,6 +46,17 @@ function RegistroStack() {
   );
 }
 
+function HomeAlumnoStack() {
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeAlumno" component={HomeAlumno} />
+      <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+    </Stack.Navigator>
+  );
+}
+
 // Pestañas principales de la app
 function HomeTabs() {
   const { theme } = useTheme();
@@ -59,7 +70,7 @@ function HomeTabs() {
     >
       <Tab.Screen
         name="HomeAlumnoTabs"
-        component={HomeAlumno}
+        component={HomeAlumnoStack}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
@@ -139,7 +150,6 @@ function AppContent() {
         {usuario ? (
           <>
             <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ gestureEnabled: false }} />
-            <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
           </>
         ) : (
           <Stack.Screen name="Registro" component={RegistroStack} />

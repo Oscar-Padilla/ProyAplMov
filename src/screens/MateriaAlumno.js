@@ -1,24 +1,74 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Modal } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { db } from '../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const MateriaAlumno = () => {
-  const { theme } = useTheme();
+
   const route = useRoute();
-  const navigation = useNavigation();
   const { idMateria } = route.params;
+  const navigation = useNavigation();
+  const { theme } = useTheme();
+  const { usuario } = useUser();
+
+  const [asistencias, setAsistencias] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const irAlMesAnterior = () => {
+    const nuevo = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    setCurrentMonth(nuevo);
+  };
+
+  const irAlMesSiguiente = () => {
+    const nuevo = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    setCurrentMonth(nuevo);
+  };
+
+  const obtenerAsistencias = async () => {
+    try {
+      if (!usuario || !usuario.uid) {
+        console.warn('Usuario no disponible aún.');
+        return;
+      }
+
+      const q = query(
+        collection(db, 'asistencias_materia'),
+        where('matId', '==', idMateria),
+        where('uid', '==', usuario.uid)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const resultados = querySnapshot.docs.map(doc => doc.data());
+      setAsistencias(resultados);
+    } catch (error) {
+      console.error('Error al obtener asistencias:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (idMateria) {
+      obtenerAsistencias();
+    }
+  }, [currentMonth, idMateria]);
+
+  const [selected, setSelected] = useState('inscrito');
 
   const [materia, setMateria] = useState(null);
   const [profesor, setProfesor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notificacionesActivas, setNotificacionesActivas] = useState(false);
   const notificationIds = useRef([]);
+  const [modalOpcionesVisible, setModalOpcionesVisible] = useState(false);
+  const [modalConfirmacionVisible, setModalConfirmacionVisible] = useState(false);
+
 
   useEffect(() => {
     lockPortrait();
@@ -135,8 +185,129 @@ const MateriaAlumno = () => {
 
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalOpcionesVisible}
+        onRequestClose={() => setModalOpcionesVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+          <View style={{
+            backgroundColor: theme.card,
+            padding: 20,
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            alignItems: 'flex-start'
+          }}>
+            <Text style={{ fontSize: 16, color: theme.text, alignSelf: 'flex-start', marginBottom: 20 }}>Opciones</Text>
+            <TouchableOpacity onPress={() => {
+              setModalOpcionesVisible(false);
+              setModalConfirmacionVisible(true);
+            }}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: theme.text, marginBottom: 30 }}>Dar de baja la materia</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalOpcionesVisible(false)}
+              style={{
+                backgroundColor: theme.primary,
+                borderRadius: 50,
+                paddingHorizontal: 24,
+                paddingVertical: 10,
+                alignSelf: 'center'
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalConfirmacionVisible}
+        onRequestClose={() => setModalConfirmacionVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+          <View style={{
+            backgroundColor: theme.card,
+            padding: 25,
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.text, marginBottom: 12 }}>¿Estás seguro?</Text>
+            <Text style={{ fontSize: 14, color: theme.text, textAlign: 'center', marginBottom: 30 }}>
+              Al dar de baja <Text style={{ fontWeight: 'bold' }}>aceptas</Text> que tu maestro deje de recibir tu asistencia, con posibilidades de bajar tu calificación de la materia.
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+              <TouchableOpacity
+                onPress={() => setModalConfirmacionVisible(false)}
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.primary,
+                  padding: 10,
+                  borderRadius: 50,
+                  marginRight: 10,
+                  alignItems: 'center'
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  // Aquí va tu lógica de "dar de baja la materia"
+                  setModalConfirmacionVisible(false);
+                  console.log('Materia dada de baja');
+                }}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#E0E0E0',
+                  padding: 10,
+                  borderRadius: 50,
+                  marginLeft: 10,
+                  alignItems: 'center'
+                }}
+              >
+                <Text style={{ color: '#000', fontWeight: 'bold' }}>Estoy seguro</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}></View>
+        <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 100,
+              backgroundColor: 'rgba(0,0,0,0.4)',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <AntDesign name="left" size={24} color='white' />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setModalOpcionesVisible(true)}
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 100,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+            <Text style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: 'white',
+              top: -8
+            }}>...</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.infoProfile}>
           <View style={styles.infoName}>
             <Text style={[styles.textName, { color: theme.text }]}>{materia.nombre}</Text>
@@ -152,38 +323,144 @@ const MateriaAlumno = () => {
             <Text style={[styles.textRole, { color: theme.text }]}>{profesor.rol} • {profesor.departamento || 'Departamento no especificado'}</Text>
           </View>
         </View>
-        <View style={styles.RatingAsistencias}>
+        {/* <View style={styles.RatingAsistencias}>
           <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
             <Text style={styles.textRating}>¡Inscríbeme!</Text>
           </TouchableOpacity>
+        </View> */}
+        <View style={styles.Selector}>
+          <TouchableOpacity
+            style={[styles.btnMaterias, selected === 'verasistencias' && styles.activeBtn, selected === 'verasistencias' && { backgroundColor: theme.primary }]}
+            onPress={() => setSelected('verasistencias')}
+          >
+            <Text style={[styles.textMaterias, selected === 'verasistencias' && styles.activeTxt, selected === 'inscrito' && { color: theme.text }]}>Ver asistencias</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.btnEventos, selected === 'inscrito' && styles.activeBtn, selected === 'inscrito' && { backgroundColor: theme.primary }]}
+            onPress={() => setSelected('inscrito')}
+          >
+            <Text style={[styles.textEventos, selected === 'inscrito' && styles.activeTxt, selected === 'verasistencias' && { color: theme.text }]}>Inscrito</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.horario}>
-          <Text style={[styles.textHorario, { color: theme.text }]}>Horario</Text>
-        </View>
-        <View style={styles.horarioContent}>
-          {(() => {
-            const rows = [];
-            for (let i = 0; i < materia.horario.length; i += 2) {
-              rows.push(
-                <View key={i} style={styles.contentRow}>
-                  <View style={styles.contentIndi}>
-                    <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i].dia.charAt(0).toUpperCase() + materia.horario[i].dia.slice(1)}</Text>
-                    <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i].inicio} - {materia.horario[i].fin}</Text>
-                    <Text style={styles.textLocation}>{materia.horario[i].lugar}</Text>
+        <View style={styles.content}>
+          {selected === 'inscrito' ? (
+            <View>
+              <View style={styles.horario}>
+                <Text style={[styles.textHorario, { color: theme.text }]}>Horario</Text>
+              </View>
+              <View style={styles.horarioContent}>
+                {(() => {
+                  const rows = [];
+                  for (let i = 0; i < materia.horario.length; i += 2) {
+                    rows.push(
+                      <View key={i} style={styles.contentRow}>
+                        <View style={styles.contentIndi}>
+                          <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i].dia.charAt(0).toUpperCase() + materia.horario[i].dia.slice(1)}</Text>
+                          <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i].inicio} - {materia.horario[i].fin}</Text>
+                          <Text style={styles.textLocation}>{materia.horario[i].lugar}</Text>
+                        </View>
+                        {materia.horario[i + 1] && (
+                          <View style={styles.contentIndi}>
+                            <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i + 1].dia.charAt(0).toUpperCase() + materia.horario[i + 1].dia.slice(1)}</Text>
+                            <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i + 1].inicio} - {materia.horario[i + 1].fin}</Text>
+                            <Text style={styles.textLocation}>{materia.horario[i + 1].lugar}</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  }
+                  return rows;
+                })()}
+              </View>
+            </View>
+          ) : (
+            <View>
+              <View style={styles.horario}>
+                <Text style={[styles.textHorario, { color: theme.text }]}>Calendario</Text>
+              </View>
+              <View style={styles.calendarioContent}>
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 10 }}>
+                    <TouchableOpacity onPress={irAlMesAnterior}>
+                      <AntDesign name="left" size={20} color={theme.text} />
+                    </TouchableOpacity>
+                    <Text style={[styles.textHorario, { color: theme.text }]}>
+                      {new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(currentMonth)}
+                    </Text>
+                    <TouchableOpacity onPress={irAlMesSiguiente}>
+                      <AntDesign name="right" size={20} color={theme.text} />
+                    </TouchableOpacity>
                   </View>
-                  {materia.horario[i + 1] && (
-                    <View style={styles.contentIndi}>
-                      <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i + 1].dia.charAt(0).toUpperCase() + materia.horario[i + 1].dia.slice(1)}</Text>
-                      <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i + 1].inicio} - {materia.horario[i + 1].fin}</Text>
-                      <Text style={styles.textLocation}>{materia.horario[i + 1].lugar}</Text>
-                    </View>
-                  )}
-                </View>
-              );
-            }
-            return rows;
-          })()}
 
+                  {/* Encabezado de días */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 6, gap: 4 }}>
+                    {['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'].map((dia, idx) => (
+                      <Text key={idx} style={{ width: 40, textAlign: 'center', color: theme.text, fontSize: 13, fontWeight: 600 }}>{dia}</Text>
+                    ))}
+                  </View>
+
+                  {/* Cuerpo del calendario */}
+                  <View>
+                    {(() => {
+                      const semanas = [];
+                      const primerDia = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+                      const totalDias = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+                      const dias = [];
+
+                      // Rellenar espacios vacíos antes del primer día
+                      for (let i = 0; i < primerDia; i++) {
+                        dias.push(null);
+                      }
+
+                      // Agregar todos los días del mes
+                      for (let d = 1; d <= totalDias; d++) {
+                        dias.push(d);
+                      }
+
+                      // Dividir en semanas
+                      for (let i = 0; i < dias.length; i += 7) {
+                        semanas.push(dias.slice(i, i + 7));
+                      }
+
+                      return semanas.map((semana, i) => (
+                        <View key={i} style={{ flexDirection: 'row', justifyContent: 'flex-start', left: 0, gap: 14 }}>
+                          {semana.map((dia, j) => {
+                            if (!dia) {
+                              return <Text key={j} style={{ width: 40, height: 30 }} />;
+                            }
+
+                            const fecha = `${currentMonth.getFullYear()}-${(currentMonth.getMonth() + 1).toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+                            const registro = asistencias.find(a => a.fecha === fecha);
+
+                            let color = '#A5A5A5';
+                            if (registro?.presente === true) color = 'green';
+                            else if (registro?.presente === false) color = 'red';
+
+                            return (
+                              <Text
+                                key={j}
+                                style={{
+                                  width: 40,
+                                  height: 30,
+                                  textAlign: 'center',
+                                  textAlignVertical: 'center',
+                                  color,
+                                  fontWeight: registro ? 'bold' : 'normal',
+                                }}
+                              >
+                                {dia}
+                              </Text>
+                            );
+                          })}
+                        </View>
+                      ));
+                    })()}
+                  </View>
+                </View>
+
+              </View>
+            </View>
+          )}
         </View>
         <View style={styles.notificaciones}>
           <Text style={[styles.idiomaTitle, { color: theme.text }]}>Notificaciones</Text>
@@ -377,7 +654,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     width: 'auto',
     height: 44,
-    top: 50,
+    top: -15,
     alignSelf: 'center',
     flexDirection: 'row',
     gap: 8,
@@ -387,13 +664,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     width: 'auto',
     height: 'auto',
-    top: 60,
+    top: 0,
     alignSelf: 'center',
     marginBottom: 100,
   },
   btnMaterias: {
     display: 'flex',
-    width: 100,
+    width: 150,
     height: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
@@ -442,6 +719,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   horarioContent: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    paddingLeft: 14,
+    paddingRight: 14,
+    alignSelf: 'stretch',
+    marginBottom: 0,
+    flexDirection: 'column',
+    gap: 20,
+    marginTop: 12
+  },
+  calendarioContent: {
     display: 'flex',
     width: 'auto',
     height: 'auto',
@@ -516,8 +805,10 @@ const styles = StyleSheet.create({
     width: 'auto',
     height: 'auto',
     alignSelf: 'flex-start',
-    marginBottom: 100,
-    paddingLeft: 14
+    marginTop: 30,
+    marginBottom: -10,
+    paddingLeft: 14,
+    top: -100
   },
   noti: {
     display: 'flex',
@@ -529,4 +820,3 @@ const styles = StyleSheet.create({
 });
 
 export default MateriaAlumno;
-
