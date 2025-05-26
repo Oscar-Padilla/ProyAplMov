@@ -115,7 +115,7 @@ const HomeAlumno = () => {
                 ) : (
                   <View style={styles.dataMaterias}>
                     {materias.map((materia, index) => (
-                      <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno')}>
+                      <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno', {idMateria:materia.id})}>
                         <View style={styles.materia}>
                           <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
                             <View style={styles.overlaymateria}>

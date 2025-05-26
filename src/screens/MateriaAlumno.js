@@ -1,126 +1,202 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
-import { useTheme } from '../context/ThemeContext'; // IMPORTANTE
-
-import materia1 from '../../assets/img/Materia1.png';
-import materia2 from '../../assets/img/Materia2.png';
-import evento1 from '../../assets/img/Evento1.png';
-import evento2 from '../../assets/img/Evento2.png';
+import { useTheme } from '../context/ThemeContext';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { db } from '../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MateriaAlumno = () => {
-  const { theme } = useTheme(); // USO DEL TEMA
+  const { theme } = useTheme();
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { idMateria } = route.params;
+
+  const [materia, setMateria] = useState(null);
+  const [profesor, setProfesor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notificacionesActivas, setNotificacionesActivas] = useState(false);
+  const notificationIds = useRef([]);
+
   useEffect(() => {
     lockPortrait();
+    obtenerDatosMateria();
+    cargarEstadoNotificacion();
   }, []);
 
-  const studentData = {
-    name: "Fulanito Mengano",
-    email: "20151714@aguascalientes.tecnm.mx",
-    career: "Ingeniería En Tecnologías De La Información Y Comunicaciones",
-    role: "Estudiante",
-    stats: {
-      materias: 2,
-      eventos: 2
-    },
-    materias: [
-      { id: '1', name: 'Aplicaciones Móviles Multiplataforma', group: 'TC1 2025A' },
-      { id: '2', name: 'Seguridad en las Aplicaciones de Software', group: 'TC1 2025A' }
-    ],
-    eventos: [
-      { id: '1', name: 'Expo Vinculación 2025' },
-      { id: '2', name: 'Jornada Ambiental para crédito complementario' }
-    ]
+  useEffect(() => {
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
+  }, [navigation]);
+
+  const cargarEstadoNotificacion = async () => {
+    try {
+      const estadoGuardado = await AsyncStorage.getItem(`notificacion_${idMateria}`);
+      if (estadoGuardado !== null) {
+        setNotificacionesActivas(estadoGuardado === 'true');
+      }
+    } catch (e) {
+      console.error('Error cargando estado de notificación:', e);
+    }
   };
 
-  const [selected, setSelected] = useState('materias');
+  const guardarEstadoNotificacion = async (estado) => {
+    try {
+      await AsyncStorage.setItem(`notificacion_${idMateria}`, String(estado));
+    } catch (e) {
+      console.error('Error guardando estado de notificación:', e);
+    }
+  };
+
+  const obtenerDatosMateria = async () => {
+    try {
+      const docRef = doc(db, 'materias', idMateria);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        const horario = Object.entries(data.horario || {})
+          .filter(([key]) => ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].includes(key))
+          .map(([dia, detalles]) => ({
+            dia,
+            inicio: detalles.inicio,
+            fin: detalles.fin,
+            lugar: detalles.lugar,
+          }));
+
+        setMateria({ ...data, horario });
+
+        const profSnap = await getDoc(doc(db, 'usuarios', data.profesorId));
+        if (profSnap.exists()) {
+          setProfesor(profSnap.data());
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar materia:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calcularTrigger = (horaClase) => {
+    const [hora, minuto] = horaClase.split(':').map(Number);
+    const claseDate = new Date();
+    claseDate.setHours(hora);
+    claseDate.setMinutes(minuto - 10);
+    claseDate.setSeconds(0);
+
+    const ahora = new Date();
+    const diferencia = (claseDate.getTime() - ahora.getTime()) / 1000;
+
+    return diferencia > 0 ? { seconds: Math.floor(diferencia) } : { seconds: 2 };
+  };
+
+  const probarNotificacion = async () => {
+    if (!materia || !materia.horario) return;
+
+    const item = materia.horario[0];
+    const trigger = calcularTrigger(item.inicio);
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `📚 ¡Clase de ${materia.nombre} en breve!`,
+        body: `🕒 Tu clase en ${item.lugar} comienza pronto a las ${item.inicio}`,
+        sound: 'default',
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger
+    });
+  };
+
+  const toggleNotificacion = async () => {
+    const nuevoEstado = !notificacionesActivas;
+    setNotificacionesActivas(nuevoEstado);
+    await guardarEstadoNotificacion(nuevoEstado);
+
+    if (nuevoEstado) {
+      await probarNotificacion();
+    } else {
+      for (const id of notificationIds.current) {
+        await Notifications.cancelScheduledNotificationAsync(id);
+      }
+      notificationIds.current = [];
+    }
+  };
+
+  if (loading || !materia || !profesor) {
+    return (
+      <View style={[styles.overlay, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }]}>
+        <Text style={{ color: theme.text }}>Cargando...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.overlay, { backgroundColor: theme.background }]}>
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
-          <View style={[styles.profileIcn, { borderColor: theme.background }]}>
-            <Text style={[styles.textProfile, { color: '#fff' }]}>FM</Text>
-          </View>
-        </View>
+        <View style={[styles.profileBg, { backgroundColor: theme.primary }]}></View>
         <View style={styles.infoProfile}>
           <View style={styles.infoName}>
-            <Text style={[styles.textName, { color: theme.text }]}>
-              {studentData.name}
-            </Text>
+            <Text style={[styles.textName, { color: theme.text }]}>{materia.nombre}</Text>
           </View>
           <View style={styles.infoStats}>
-            <Text style={[styles.textStats, { color: theme.text }]}>
-              {studentData.stats.materias} materias • {studentData.stats.eventos} eventos
-            </Text>
+            <Text style={[styles.textStats, { color: theme.text }]}>{materia.grupo}</Text>
+            <Text style={[styles.textStats, { color: theme.text }]}>{profesor.nombre} {profesor.apellido}</Text>
           </View>
           <View style={styles.infoEmail}>
-            <Text style={[styles.textEmail, { color: theme.text }]}>
-              {studentData.email}
-            </Text>
+            <Text style={[styles.textEmail, { color: theme.text }]}>{profesor.correo}</Text>
           </View>
           <View style={styles.infoRole}>
-            <Text style={[styles.textRole, { color: theme.text }]}>
-              {studentData.role} • {studentData.career}
-            </Text>
+            <Text style={[styles.textRole, { color: theme.text }]}>{profesor.rol} • {profesor.departamento || 'Departamento no especificado'}</Text>
           </View>
         </View>
         <View style={styles.RatingAsistencias}>
           <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
-            <Text style={styles.textRating}>Rating de asistencias</Text>
+            <Text style={styles.textRating}>¡Inscríbeme!</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.Selector}>
-          <TouchableOpacity
-            style={[styles.btnMaterias, selected === 'materias' && styles.activeBtn, selected === 'materias' && { backgroundColor: theme.primary }]}
-            onPress={() => setSelected('materias')}
-          >
-            <Text style={[styles.textMaterias, selected === 'materias' && styles.activeTxt, selected === 'eventos'  && { color: theme.text }]} >Materias</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.btnEventos, selected === 'eventos' && styles.activeBtn, selected === 'eventos' && { backgroundColor: theme.primary }]}
-            onPress={() => setSelected('eventos')}
-          >
-            <Text style={[styles.textEventos, selected === 'eventos' && styles.activeTxt, selected === 'materias' && { color: theme.text }]}>Eventos</Text>
-          </TouchableOpacity>
+        <View style={styles.horario}>
+          <Text style={[styles.textHorario, { color: theme.text }]}>Horario</Text>
         </View>
-        <View style={styles.content}>
-          {selected === 'materias' ? (
-            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
-              <View style={styles.dataMaterias}>
-                {studentData.materias.map((materia, index) => (
-                  <View key={materia.id} style={styles.materia}>
-                    <ImageBackground
-                      source={index === 0 ? materia1 : materia2}
-                      style={styles.imgMateria}
-                    >
-                      <View style={styles.overlaymateria}>
-                        <Text style={styles.textGrupo}>{materia.group}</Text>
-                        <Text style={styles.textMateria}>{materia.name}</Text>
-                      </View>
-                    </ImageBackground>
+        <View style={styles.horarioContent}>
+          {(() => {
+            const rows = [];
+            for (let i = 0; i < materia.horario.length; i += 2) {
+              rows.push(
+                <View key={i} style={styles.contentRow}>
+                  <View style={styles.contentIndi}>
+                    <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i].dia.charAt(0).toUpperCase() + materia.horario[i].dia.slice(1)}</Text>
+                    <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i].inicio} - {materia.horario[i].fin}</Text>
+                    <Text style={styles.textLocation}>{materia.horario[i].lugar}</Text>
                   </View>
-                ))}
-              </View>
-            </ScrollView>
-          ) : (
-            <ScrollView horizontal={true} style={{ flexDirection: 'row' }} showsHorizontalScrollIndicator={false}>
-              <View style={styles.dataMaterias}>
-                {studentData.eventos.map((evento, index) => (
-                  <View key={evento.id} style={styles.materia}>
-                    <ImageBackground
-                      source={index === 0 ? evento1 : evento2}
-                      style={styles.imgMateria}
-                    >
-                      <View style={styles.overlaymateria}>
-                        <Text style={styles.textMateria}>{evento.name}</Text>
-                      </View>
-                    </ImageBackground>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          )}
+                  {materia.horario[i + 1] && (
+                    <View style={styles.contentIndi}>
+                      <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i + 1].dia.charAt(0).toUpperCase() + materia.horario[i + 1].dia.slice(1)}</Text>
+                      <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i + 1].inicio} - {materia.horario[i + 1].fin}</Text>
+                      <Text style={styles.textLocation}>{materia.horario[i + 1].lugar}</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            }
+            return rows;
+          })()}
+
+        </View>
+        <View style={styles.notificaciones}>
+          <Text style={[styles.idiomaTitle, { color: theme.text }]}>Notificaciones</Text>
+          <View style={styles.noti}>
+            <Text style={[styles.aspectoText, { color: theme.text }]}>Avísame cuando esté por empezar</Text>
+            <Switch
+              style={styles.switch}
+              trackColor={{ false: '#767577', true: '#49225B' }}
+              thumbColor={notificacionesActivas ? '#fff' : '#f4f3f4'}
+              onValueChange={toggleNotificacion}
+              value={notificacionesActivas}
+            />
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -141,37 +217,13 @@ const styles = StyleSheet.create({
     top: -30,
     backgroundColor: '#A56ABD',
   },
-  profileIcn: {
-    display: 'flex',
-    width: 120,
-    height: 120,
-    borderRadius: 100,
-    backgroundColor: '#52355E',
-    top: 150,
-    alignSelf: 'center',
-    borderColor: '#fff',
-    borderWidth: 2
-  },
-  textProfile: {
-    position: 'flex',
-    width: 'auto',
-    height: 120,
-    color: '#fff',
-    fontSize: 36,
-    fontFamily: 'Roboto',
-    fontWeight: '600',
-    textAlign: 'center',
-    top: 30,
-  },
   infoProfile: {
     display: 'flex',
     width: 'auto',
     height: 'auto',
-    top: 30,
+    top: -30,
     alignSelf: 'center',
     gap: 7,
-    paddingLeft: 24,
-    paddingRight: 24,
     marginBottom: 8,
   },
   infoName: {
@@ -199,7 +251,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: 'bold',
-    lineHeight: 20
+    lineHeight: 20,
+    paddingBottom: 8
   },
   infoEmail: {
     display: 'flex',
@@ -232,14 +285,14 @@ const styles = StyleSheet.create({
   },
   RatingAsistencias: {
     display: 'flex',
-    width: 220,
+    width: 'auto',
     height: 60,
     alignSelf: 'center',
-    top: 35,
+    top: -20,
   },
   btnRating: {
     display: 'flex',
-    width: 220,
+    width: 'auto',
     height: 60,
     padding: 16,
     justifyContent: 'center',
@@ -252,7 +305,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     fontSize: 16,
     fontStyle: 'normal',
-    fontWeight: '600',
+    fontWeight: 'bold',
     lineHeight: 20,
   },
   dataMaterias: {
@@ -375,7 +428,105 @@ const styles = StyleSheet.create({
   },
   activeTxt: {
     color: '#fff',
+  },
+  horario: {
+    display: 'flex',
+    alignSelf: 'center'
+  },
+  textHorario: {
+    color: '#191919',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20,
+  },
+  horarioContent: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    paddingLeft: 14,
+    paddingRight: 14,
+    alignSelf: 'stretch',
+    marginBottom: 20,
+    flexDirection: 'column',
+    gap: 20,
+    marginTop: 12
+  },
+  contentIndi: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    alignItems: 'flex-start',
+    flexDirection: 'column',
+    gap: 4,
+  },
+  contentRow: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    gap: 14,
+  },
+  textDay: {
+    color: '#191919',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20,
+  },
+  textTime: {
+    color: '#191919',
+    fontFamily: 'Roboto',
+    fontSize: 18,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20,
+  },
+  textLocation: {
+    color: '#A5A5A5',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20,
+  },
+  idiomaTitle: {
+    alignSelf: 'stretch',
+    fontSize: 16,
+    fontWeight: '400',
+    lineHeight: 20,
+    letterSpacing: -0.32
+  },
+  aspectoText: {
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: -0.5,
+  },
+  switch: {
+    width: 'auto',
+    height: 'auto',
+    alignSelf: 'flex-end',
+    marginBottom: -10
+  },
+  notificaciones: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    alignSelf: 'flex-start',
+    marginBottom: 100,
+    paddingLeft: 14
+  },
+  noti: {
+    display: 'flex',
+    width: 'auto',
+    height: 30,
+    flexDirection: 'row',
+    gap: 10
   }
 });
 
 export default MateriaAlumno;
+
