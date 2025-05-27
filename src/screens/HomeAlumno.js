@@ -105,17 +105,27 @@ const HomeAlumno = () => {
           <View style={styles.containerMaterias}>
             <View style={styles.materias}>
               <Text style={[styles.textMaterias, { color: theme.text }]}>Materias</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {cargandoMaterias ? (
+              {cargandoMaterias ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.dataMaterias}>
                     {[1, 2].map((_, i) => (
                       <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
                     ))}
                   </View>
-                ) : (
+                </ScrollView>
+              ) : materias.length === 0 ? (
+                <Text style={[styles.emptyTitle, { color: theme.text }]}>No tienes materias</Text>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.dataMaterias}>
                     {materias.map((materia, index) => (
-                      <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno', {idMateria:materia.id})}>
+                      <TouchableOpacity
+                        key={materia.id}
+                        onPress={() => navigation.navigate(
+                          usuario.rol === 'Profesor' ? 'MateriaMaestro' : 'MateriaAlumno',
+                          { idMateria: materia.id }
+                        )}
+                      >
                         <View style={styles.materia}>
                           <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
                             <View style={styles.overlaymateria}>
@@ -127,23 +137,28 @@ const HomeAlumno = () => {
                       </TouchableOpacity>
                     ))}
                   </View>
-                )}
-              </ScrollView>
+                </ScrollView>
+              )}
             </View>
           </View>
+
 
           {/* Eventos */}
           <View style={styles.containerMaterias}>
             <View style={styles.materias}>
               <Text style={[styles.textMaterias, { color: theme.text }]}>Eventos</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {cargandoEventos ? (
+              {cargandoEventos ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.dataMaterias}>
                     {[1, 2].map((_, i) => (
                       <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
                     ))}
                   </View>
-                ) : (
+                </ScrollView>
+              ) : eventos.length === 0 ? (
+                <Text style={[styles.emptyTitle, { color: theme.text }]}>No tienes eventos</Text>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.dataMaterias}>
                     {eventos.map((evento, index) => (
                       <View key={evento.id} style={styles.materia}>
@@ -155,10 +170,11 @@ const HomeAlumno = () => {
                       </View>
                     ))}
                   </View>
-                )}
-              </ScrollView>
+                </ScrollView>
+              )}
             </View>
           </View>
+
         </>
       )}
 

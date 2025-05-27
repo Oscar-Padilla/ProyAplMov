@@ -155,15 +155,18 @@ const CuentaAlumno = () => {
 
         <View style={styles.content}>
           {selected === 'materias' ? (
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {loadingMaterias
-                  ? [1, 2].map((_, i) => (
+                {loadingMaterias ? (
+                  [1, 2].map((_, i) => (
                     <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
                   ))
-                  : materias.map((materia, index) => (
+                ) : materias.length === 0 ? (
+                  <Text style={{ color: theme.text, padding: 20 }}>No estás inscrito en ninguna materia aún.</Text>
+                ) : (
+                  materias.map((materia, index) => (
                     <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno', { idMateria: materia.id })}>
-                      <View key={materia.id} style={styles.materia}>
+                      <View style={styles.materia}>
                         <ImageBackground
                           source={index % 2 === 0 ? materia1 : materia2}
                           style={styles.imgMateria}
@@ -175,17 +178,21 @@ const CuentaAlumno = () => {
                         </ImageBackground>
                       </View>
                     </TouchableOpacity>
-                  ))}
+                  ))
+                )}
               </View>
             </ScrollView>
           ) : (
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.dataMaterias}>
-                {loadingEventos
-                  ? [1, 2].map((_, i) => (
+                {loadingEventos ? (
+                  [1, 2].map((_, i) => (
                     <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
                   ))
-                  : eventos.map((evento, index) => (
+                ) : eventos.length === 0 ? (
+                  <Text style={{ color: theme.text, padding: 20 }}>No estás inscrito en ningún evento aún.</Text>
+                ) : (
+                  eventos.map((evento, index) => (
                     <View key={evento.id} style={styles.materia}>
                       <ImageBackground
                         source={index % 2 === 0 ? evento1 : evento2}
@@ -196,10 +203,12 @@ const CuentaAlumno = () => {
                         </View>
                       </ImageBackground>
                     </View>
-                  ))}
+                  ))
+                )}
               </View>
             </ScrollView>
           )}
+
         </View>
 
       </ScrollView>

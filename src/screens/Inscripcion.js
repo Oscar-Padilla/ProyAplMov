@@ -1,25 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Dimensions } from 'react-native';
-import { lockPortrait } from '../../assets/utils/orientationUtils'; // ajusta ruta
+import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useIsFocused } from '@react-navigation/native'; // 👈 IMPORTANTE
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+
+import { db } from '../../firebaseConfig';
+import { doc, getDoc, updateDoc, arrayUnion, setDoc } from 'firebase/firestore';
+import { useUser } from '../context/UserContext';
 
 export default function QRScannerScreen() {
     useEffect(() => {
         lockPortrait();
     }, []);
 
-
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [qrData, setQrData] = useState('');
     const [cameraKey, setCameraKey] = useState(0);
-    const isFocused = useIsFocused(); // 👈 saber si esta pestaña está activa
 
-    const handleBarCodeScanned = ({ data }) => {
-        setScanned(true);
-        setQrData(data);
-        alert(`QR escaneado: ${data}`);
+    const isFocused = useIsFocused();
+    const navigation = useNavigation();
+    const { usuario, setUsuario } = useUser(); // ✅ Aquí debe estar
+
+    const handleBarCodeScanned = async ({ data }) => {
+        try {
+            const parsed = JSON.parse(data);
+            const id = parsed.idMateria || parsed.idEvento;
+            const nombre = parsed.nombre;
+
+            if (!id || !nombre) {
+                alert("El QR escaneado no tiene el formato correcto.");
+                return;
+            }
+
+            const tipo = id.startsWith("mat") ? "materia" : id.startsWith("ev") ? "evento" : null;
+            if (!tipo) {
+                alert("No se pudo identificar si es una materia o evento.");
+                return;
+            }
+
+            // Verifica existencia
+            const recursoRef = doc(db, tipo === 'materia' ? 'materias' : 'eventos', id);
+            const recursoSnap = await getDoc(recursoRef);
+            if (!recursoSnap.exists()) {
+                alert(`${tipo === 'materia' ? 'Materia' : 'Evento'} no encontrado.`);
+                return;
+            }
+
+            // Actualiza usuario (usuarios → materiasInscritas o eventosInscritos)
+            const usuarioRef = doc(db, 'usuarios', usuario.uid);
+            const campo = tipo === 'materia' ? 'materiasInscritas' : 'eventosInscritos';
+            await updateDoc(usuarioRef, {
+                [campo]: arrayUnion(id)
+            });
+
+            // Refrescar usuario en contexto
+            const userSnap = await getDoc(usuarioRef);
+            const userData = userSnap.data();
+            setUsuario({ ...userData, uid: usuario.uid });
+
+
+            // Inserta en colección de inscripciones
+            if (tipo === 'materia') {
+                const inscripcionId = `${usuario.uid}__${id}`;
+                const inscripcionRef = doc(db, 'inscripciones_materia', inscripcionId);
+                const inscripcionSnap = await getDoc(inscripcionRef);
+
+                if (!inscripcionSnap.exists()) {
+                    await setDoc(inscripcionRef, {
+                        uid: usuario.uid,
+                        matId: id,
+                        estado: "inscrito"
+                    });
+                }
+            }
+
+            setScanned(true);
+            alert(`¡Inscrito correctamente en la ${tipo}: ${nombre}!`);
+
+            // Redirección correcta
+            if (tipo === 'materia') {
+                navigation.navigate('CuentaAlumnoTabs', {
+                    screen: 'MateriaAlumno',
+                    params: { idMateria: id },
+                });
+            } else {
+                navigation.navigate('CuentaAlumnoTabs', {
+                    screen: 'EventoAlumno',
+                    params: { idEvento: id },
+                });
+            }
+
+        } catch (error) {
+            console.error("Error al procesar QR:", error);
+            alert("QR inválido o error al procesarlo.");
+        }
     };
 
     const reiniciarEscaneo = () => {
@@ -39,7 +114,7 @@ export default function QRScannerScreen() {
 
     return (
         <View style={styles.container}>
-            {!scanned && isFocused && ( // 👈 solo monta la cámara si la pestaña está activa
+            {!scanned && isFocused && (
                 <CameraView
                     key={cameraKey}
                     style={styles.camera}

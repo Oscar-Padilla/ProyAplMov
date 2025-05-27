@@ -40,7 +40,12 @@ const IniciodeSesion_1 = ({ modalVisible, setModalVisible, onLogin }) => {
       });
 
       if (userFound) {
-        onLogin(userFound);
+        if (!userFound.rol) {
+          Alert.alert('Error', 'Tu cuenta no tiene un rol asignado');
+          return;
+        }
+
+        onLogin(userFound); // 👈 Aquí se pasa el usuario completo con el rol
         setModalVisible(false);
         setCorreo('');
         setPassword('');

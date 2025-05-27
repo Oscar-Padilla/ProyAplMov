@@ -30,6 +30,12 @@ import Settings from './src/screens/Settings';
 import CuentaAlumno from './src/screens/CuentaAlumno';
 import MateriaAlumno from './src/screens/MateriaAlumno';
 
+// Pantallas maestro
+import HomeMaestro from './src/screens/HomeMaestro';
+import CuentaMaestro from './src/screens/CuentaMaestro';
+import CreacionMaestro from './src/screens/CreacionMaestro';
+import MateriaMaestro from './src/screens/MateriaMaestro';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +63,17 @@ function HomeAlumnoStack() {
   );
 }
 
+function HomeMaestroStack() {
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="HomeMaestro" component={HomeMaestro} />
+      <Stack.Screen name="MateriaMaestro" component={MateriaMaestro} />
+    </Stack.Navigator>
+  );
+}
+
 function CuentaAlumnoStack() {
   const Stack = createStackNavigator();
 
@@ -68,8 +85,19 @@ function CuentaAlumnoStack() {
   );
 }
 
-// Pestañas principales de la app
-function HomeTabs() {
+function CuentaMaestroStack() {
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CuentaMaestro" component={CuentaMaestro} />
+      <Stack.Screen name="MateriaMaestro" component={MateriaMaestro} />
+    </Stack.Navigator>
+  );
+}
+
+// Pantallas Alumno
+function HomeAlumnoTabs() {
   const { theme } = useTheme();
 
   return (
@@ -133,6 +161,61 @@ function HomeTabs() {
   );
 }
 
+// Pantallas Maestro
+function HomeMaestroTabs() {
+  const { theme } = useTheme();
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: theme.card },
+      }}
+    >
+      <Tab.Screen
+        name="HomeMaestroTabs"
+        component={HomeMaestroStack}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <Foundation name="home" size={30} color={focused ? theme.primary : 'gray'} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CreacionMaestro"
+        component={CreacionMaestro}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <FontAwesome5 name="plus" size={28} color={focused ? theme.primary : 'gray'} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons name="nut" size={30} color={focused ? theme.primary : 'gray'} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CuentaMaestroTabs"
+        component={CuentaMaestroStack}
+        options={{
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <FontAwesome6 name="user-large" size={24} color={focused ? theme.primary : 'gray'} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 // Contenido principal de la app, según si hay sesión o no
 function AppContent() {
   const { theme, isDarkMode } = useTheme();
@@ -159,12 +242,15 @@ function AppContent() {
         }}
       >
         {usuario ? (
-          <>
-            <Stack.Screen name="HomeAlumno" component={HomeTabs} options={{ gestureEnabled: false }} />
-          </>
+          usuario.rol === 'Profesor' ? (
+            <Stack.Screen name="HomeMaestro" component={HomeMaestroTabs} options={{ gestureEnabled: false }} />
+          ) : (
+            <Stack.Screen name="HomeAlumno" component={HomeAlumnoTabs} options={{ gestureEnabled: false }} />
+          )
         ) : (
           <Stack.Screen name="Registro" component={RegistroStack} />
         )}
+
       </Stack.Navigator>
     </>
   );

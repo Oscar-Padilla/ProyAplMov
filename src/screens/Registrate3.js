@@ -15,6 +15,17 @@ const Registrate3 = () => {
   const totalPaginas = 4;
   const progreso = paginaActual / totalPaginas;
 
+  // 👇 Función para detectar el rol según el correo
+  const detectarRolPorCorreo = (correo) => {
+    const dominio = "@aguascalientes.tecnm.mx";
+
+    if (correo.endsWith(dominio)) {
+      const parteUsuario = correo.split("@")[0];
+      return /^[0-9]+$/.test(parteUsuario) ? "Estudiante" : "Profesor";
+    }
+    return "Externo";
+  };
+
   const registrarNuevoUsuario = async () => {
     try {
       const snapshot = await getDocs(collection(db, 'usuarios'));
@@ -28,12 +39,14 @@ const Registrate3 = () => {
       const siguienteNumero = uids.length > 0 ? Math.max(...uids) + 1 : 1;
       const nuevoUID = `uid_alumno_${siguienteNumero}`;
 
+      const rol = detectarRolPorCorreo(correo); // 👈 Determina el rol aquí
+
       const nuevoUsuario = {
         correo,
         contraseña,
         nombre,
         apellido,
-        rol: 'Externo'
+        rol,
       };
 
       await setDoc(doc(db, 'usuarios', nuevoUID), nuevoUsuario);
@@ -43,7 +56,7 @@ const Registrate3 = () => {
         routes: [{ name: 'IniciodeSesion' }],
       });
     } catch (error) {
-      console.error('Error al registrar usuario externo:', error);
+      console.error('Error al registrar usuario:', error);
     }
   };
 

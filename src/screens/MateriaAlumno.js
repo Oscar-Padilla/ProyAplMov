@@ -9,6 +9,7 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { updateDoc, arrayRemove, deleteDoc } from 'firebase/firestore';
 
 const MateriaAlumno = () => {
 
@@ -254,10 +255,30 @@ const MateriaAlumno = () => {
                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => {
-                  // Aquí va tu lógica de "dar de baja la materia"
-                  setModalConfirmacionVisible(false);
-                  console.log('Materia dada de baja');
+                onPress={async () => {
+                  try {
+                    const idMateria = route.params?.idMateria;
+                    const uid = usuario.uid;
+
+                    // 1. Remover idMateria de materiasInscritas del usuario
+                    const usuarioRef = doc(db, 'usuarios', uid);
+                    await updateDoc(usuarioRef, {
+                      materiasInscritas: arrayRemove(idMateria),
+                    });
+
+                    // 2. Eliminar documento en inscripciones_materia
+                    const inscripcionId = `${uid}__${idMateria}`;
+                    const inscripcionRef = doc(db, 'inscripciones_materia', inscripcionId);
+                    await deleteDoc(inscripcionRef);
+
+                    // 3. Cerrar modal y volver a la pantalla anterior
+                    setModalConfirmacionVisible(false);
+                    navigation.goBack(); // o navigate('CuentaAlumnoTabs')
+
+                  } catch (error) {
+                    console.error('Error al dar de baja la materia:', error);
+                    alert('Hubo un error al dar de baja la materia');
+                  }
                 }}
                 style={{
                   flex: 1,
@@ -270,6 +291,7 @@ const MateriaAlumno = () => {
               >
                 <Text style={{ color: '#000', fontWeight: 'bold' }}>Estoy seguro</Text>
               </TouchableOpacity>
+
             </View>
           </View>
         </View>
