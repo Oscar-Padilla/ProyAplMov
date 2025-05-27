@@ -161,13 +161,21 @@ const HomeAlumno = () => {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.dataMaterias}>
                     {eventos.map((evento, index) => (
-                      <View key={evento.id} style={styles.materia}>
-                        <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
-                          <View style={styles.overlaymateria}>
-                            <Text style={styles.textMateria}>{evento.nombre}</Text>
-                          </View>
-                        </ImageBackground>
-                      </View>
+                      <TouchableOpacity
+                        key={evento.id}
+                        onPress={() => navigation.navigate(
+                          usuario.rol === 'Profesor' ? 'EventoMaestro' : 'EventoAlumno',
+                          { idEvento: evento.id }
+                        )}
+                      >
+                        <View key={evento.id} style={styles.materia}>
+                          <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      </TouchableOpacity>
                     ))}
                   </View>
                 </ScrollView>

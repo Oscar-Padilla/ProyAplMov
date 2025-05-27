@@ -29,6 +29,7 @@ import RegistrarAsistenciaAlumno from './src/screens/RegistrarAsistenciaAlumno';
 import Settings from './src/screens/Settings';
 import CuentaAlumno from './src/screens/CuentaAlumno';
 import MateriaAlumno from './src/screens/MateriaAlumno';
+import EventoAlumno from './src/screens/EventoAlumno';
 
 // Pantallas maestro
 import HomeMaestro from './src/screens/HomeMaestro';
@@ -59,6 +60,7 @@ function HomeAlumnoStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeAlumno" component={HomeAlumno} />
       <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+      <Stack.Screen name="EventoAlumno" component={EventoAlumno} />
     </Stack.Navigator>
   );
 }
@@ -81,6 +83,7 @@ function CuentaAlumnoStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CuentaAlumno" component={CuentaAlumno} />
       <Stack.Screen name="MateriaAlumno" component={MateriaAlumno} />
+      <Stack.Screen name="EventoAlumno" component={EventoAlumno} />
     </Stack.Navigator>
   );
 }
