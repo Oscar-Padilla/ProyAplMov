@@ -32,10 +32,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/Logo.png",
         "backgroundColor": "white"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.deska.ProyAplMov"
     },
     "web": {
       "favicon": "./assets/img/Logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8f2a74e6-4420-4c2e-83c1-fb8c0c3e12f7"
+      }
     }
   }
 }
