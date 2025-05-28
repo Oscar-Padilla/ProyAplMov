@@ -23,21 +23,7 @@ const RegistraAsistenciaAlumno1 = () => {
     }, [])
   );
 
-  useEffect(() => {
-    if (abrir) {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [abrir]);
+
   return (
 
     <View

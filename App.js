@@ -137,6 +137,15 @@ function CreacionMaestroStack() {
   );
 }
 
+function RegistrarAsistenciaStack() {
+  const Stack = createStackNavigator();
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="RegistrarAsistenciaAlumno" component={RegistrarAsistenciaAlumno} />
+    </Stack.Navigator>
+  );
+}
+
 // Pantallas Alumno
 function HomeAlumnoTabs() {
   const { theme } = useTheme();
@@ -169,8 +178,8 @@ function HomeAlumnoTabs() {
         }}
       />
       <Tab.Screen
-        name="RegistrarAsistencia"
-        component={RegistrarAsistenciaAlumno}
+        name="RegistrarAsistenciaTabs"
+        component={RegistrarAsistenciaStack}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (

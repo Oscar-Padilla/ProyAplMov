@@ -200,6 +200,9 @@ const EventoAlumno = () => {
 
             <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
                 <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
+                    {evento.portadaUri ? (
+                        <Image source={{ uri: evento.portadaUri }} style={{ width: '100%', height: 'auto', position: 'absolute' }} resizeMode="cover" />
+                    ) : null}
                     <TouchableOpacity
                         onPress={() => navigation.goBack()}
                         style={{
