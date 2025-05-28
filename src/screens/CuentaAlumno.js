@@ -191,20 +191,25 @@ const CuentaAlumno = () => {
                   ))
                 ) : eventos.length === 0 ? (
                   <Text style={{ color: theme.text, padding: 20 }}>No estás inscrito en ningún evento aún.</Text>
-                ) : (
-                  eventos.map((evento, index) => (
-                    <View key={evento.id} style={styles.materia}>
-                      <ImageBackground
-                        source={index % 2 === 0 ? evento1 : evento2}
-                        style={styles.imgMateria}
+                  ) : (
+                    eventos.map((evento, index) => (
+                      <TouchableOpacity
+                        key={evento.id}
+                        onPress={() => navigation.navigate(
+                          usuario.rol === 'Profesor' ? 'EventoMaestro' : 'EventoAlumno',
+                          { idEvento: evento.id }
+                        )}
                       >
-                        <View style={styles.overlaymateria}>
-                          <Text style={styles.textMateria}>{evento.nombre}</Text>
+                        <View key={evento.id} style={styles.materia}>
+                          <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
                         </View>
-                      </ImageBackground>
-                    </View>
-                  ))
-                )}
+                      </TouchableOpacity>
+                    ))
+                  )}
               </View>
             </ScrollView>
           )}

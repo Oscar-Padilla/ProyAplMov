@@ -36,6 +36,14 @@ import HomeMaestro from './src/screens/HomeMaestro';
 import CuentaMaestro from './src/screens/CuentaMaestro';
 import CreacionMaestro from './src/screens/CreacionMaestro';
 import MateriaMaestro from './src/screens/MateriaMaestro';
+import CrearMateria from './src/screens/CrearMateria';
+import CrearMateria1 from './src/screens/CrearMateria1';
+import CrearMateria2 from './src/screens/CrearMateria2';
+import CrearMateria3 from './src/screens/CrearMateria3';
+import CrearMateria4 from './src/screens/CrearMateria4';
+import CrearMateria5 from './src/screens/CrearMateria5';
+import CrearEvento from  './src/screens/CrearEvento';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -95,6 +103,23 @@ function CuentaMaestroStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CuentaMaestro" component={CuentaMaestro} />
       <Stack.Screen name="MateriaMaestro" component={MateriaMaestro} />
+    </Stack.Navigator>
+  );
+}
+
+function CreacionMaestroStack() {
+  const Stack = createStackNavigator();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CreacionMaestro" component={CreacionMaestro} />
+      <Stack.Screen name="CrearMateria" component={CrearMateria} />
+      <Stack.Screen name="CrearMateria1" component={CrearMateria1} />
+      <Stack.Screen name="CrearMateria2" component={CrearMateria2} />
+      <Stack.Screen name="CrearMateria3" component={CrearMateria3} />
+      <Stack.Screen name="CrearMateria4" component={CrearMateria4} />
+      <Stack.Screen name="CrearMateria5" component={CrearMateria5} />
+      {/* <Stack.Screen name="CrearEvento" component={CrearEvento} /> */}
     </Stack.Navigator>
   );
 }
@@ -186,8 +211,8 @@ function HomeMaestroTabs() {
         }}
       />
       <Tab.Screen
-        name="CreacionMaestro"
-        component={CreacionMaestro}
+        name="CreacionMaestroTabs"
+        component={CreacionMaestroStack}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
