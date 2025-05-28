@@ -106,17 +106,32 @@ const CuentaMaestro = () => {
                 ) : (
                   materias.map((materia, index) => (
                     <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaMaestro', { idMateria: materia.id })}>
-                      <View style={styles.materia}>
-                        <ImageBackground
-                          source={index % 2 === 0 ? materia1 : materia2}
-                          style={styles.imgMateria}
-                        >
-                          <View style={styles.overlaymateria}>
-                            <Text style={styles.textGrupo}>{materia.grupo}</Text>
-                            <Text style={styles.textMateria}>{materia.nombre}</Text>
-                          </View>
-                        </ImageBackground>
-                      </View>
+                      {materia.portadaUri ? (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            source={{ uri: materia.portadaUri }}
+                            style={styles.imgMateria}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                              <Text style={styles.textMateria}>{materia.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      ) : (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                              <Text style={styles.textMateria}>{materia.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      )}
                     </TouchableOpacity>
                   ))
                 )}
@@ -153,253 +168,253 @@ const CuentaMaestro = () => {
 };
 
 const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: "white",
-        paddingTop: 25
-    },
-    profileBg: {
-        display: 'flex',
-        width: 'auto',
-        height: 210,
-        top: -30,
-        backgroundColor: '#A56ABD',
-    },
-    profileIcn: {
-        display: 'flex',
-        width: 120,
-        height: 120,
-        borderRadius: 100,
-        backgroundColor: '#52355E',
-        top: 150,
-        alignSelf: 'center',
-        borderColor: '#fff',
-        borderWidth: 2
-    },
-    textProfile: {
-        position: 'flex',
-        width: 'auto',
-        height: 120,
-        color: '#fff',
-        fontSize: 36,
-        fontFamily: 'Roboto',
-        fontWeight: '600',
-        textAlign: 'center',
-        top: 30,
-    },
-    infoProfile: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-        top: 30,
-        alignSelf: 'center',
-        gap: 7,
-        paddingLeft: 24,
-        paddingRight: 24,
-        marginBottom: 8,
-    },
-    infoName: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-    },
-    textName: {
-        color: '#191919',
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 36,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-    },
-    infoStats: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-    },
-    textStats: {
-        color: '#191919',
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-        lineHeight: 20
-    },
-    infoEmail: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-    },
-    textEmail: {
-        color: '#191919',
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-        lineHeight: 20
-    },
-    infoRole: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-        paddingTop: 8
-    },
-    textRole: {
-        color: '#191919',
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: '400',
-        lineHeight: 20
-    },
-    RatingAsistencias: {
-        display: 'flex',
-        width: 220,
-        height: 60,
-        alignSelf: 'center',
-        top: 35,
-    },
-    btnRating: {
-        display: 'flex',
-        width: 220,
-        height: 60,
-        padding: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#49225B',
-        borderRadius: 100,
-    },
-    textRating: {
-        color: '#fff',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: '600',
-        lineHeight: 20,
-    },
-    dataMaterias: {
-        display: 'flex',
-        paddingLeft: 8,
-        alignItems: 'flex-start',
-        gap: 10,
-        alignSelf: 'stretch',
-        flexDirection: 'row',
-    },
-    materia: {
-        display: 'flex',
-        width: 324,
-        height: 234,
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2,
-    },
-    imgMateria: {
-        width: 324,
-        height: 234,
-        borderRadius: 30,
-        overflow: 'hidden',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2
-    },
-    overlaymateria: {
-        display: 'flex',
-        width: 324,
-        height: 234,
-        borderRadius: 30,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        gap: 2
-    },
-    textGrupo: {
-        position: 'flex',
-        width: 'auto',
-        height: 'auto',
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: '600',
-        lineHeight: 20,
-        letterSpacing: -0.32,
-        color: '#FFF'
-    },
-    textMateria: {
-        position: 'flex',
-        width: 'auto',
-        height: 'auto',
-        paddingBottom: 12,
-        paddingLeft: 12,
-        paddingRight: 12,
-        textAlign: 'center',
-        fontFamily: 'Roboto',
-        fontSize: 28,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-        letterSpacing: -0.32,
-        color: '#FFF',
-        lineHeight: 28
-    },
-    Selector: {
-        display: 'flex',
-        width: 'auto',
-        height: 44,
-        top: 50,
-        alignSelf: 'center',
-        flexDirection: 'row',
-        gap: 8,
-        marginBottom: 8,
-    },
-    content: {
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-        top: 60,
-        alignSelf: 'center',
-        marginBottom: 100,
-    },
-    btnMaterias: {
-        display: 'flex',
-        width: 100,
-        height: 'auto',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 100,
-    },
-    textMaterias: {
-        color: '#191919',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-        lineHeight: 20,
-    },
-    btnEventos: {
-        display: 'flex',
-        width: 100,
-        height: 'auto',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 100,
-    },
-    textEventos: {
-        color: '#191919',
-        fontFamily: 'Roboto',
-        fontSize: 16,
-        fontStyle: 'normal',
-        fontWeight: 'bold',
-        lineHeight: 20,
-    },
-    activeBtn: {
-        backgroundColor: '#49225B',
-    },
-    activeTxt: {
-        color: '#fff',
-    }
+  overlay: {
+    flex: 1,
+    backgroundColor: "white",
+    paddingTop: 25
+  },
+  profileBg: {
+    display: 'flex',
+    width: 'auto',
+    height: 210,
+    top: -30,
+    backgroundColor: '#A56ABD',
+  },
+  profileIcn: {
+    display: 'flex',
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    backgroundColor: '#52355E',
+    top: 150,
+    alignSelf: 'center',
+    borderColor: '#fff',
+    borderWidth: 2
+  },
+  textProfile: {
+    position: 'flex',
+    width: 'auto',
+    height: 120,
+    color: '#fff',
+    fontSize: 36,
+    fontFamily: 'Roboto',
+    fontWeight: '600',
+    textAlign: 'center',
+    top: 30,
+  },
+  infoProfile: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    top: 30,
+    alignSelf: 'center',
+    gap: 7,
+    paddingLeft: 24,
+    paddingRight: 24,
+    marginBottom: 8,
+  },
+  infoName: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+  },
+  textName: {
+    color: '#191919',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 36,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+  },
+  infoStats: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+  },
+  textStats: {
+    color: '#191919',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20
+  },
+  infoEmail: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+  },
+  textEmail: {
+    color: '#191919',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20
+  },
+  infoRole: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    paddingTop: 8
+  },
+  textRole: {
+    color: '#191919',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 20
+  },
+  RatingAsistencias: {
+    display: 'flex',
+    width: 220,
+    height: 60,
+    alignSelf: 'center',
+    top: 35,
+  },
+  btnRating: {
+    display: 'flex',
+    width: 220,
+    height: 60,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#49225B',
+    borderRadius: 100,
+  },
+  textRating: {
+    color: '#fff',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  dataMaterias: {
+    display: 'flex',
+    paddingLeft: 8,
+    alignItems: 'flex-start',
+    gap: 10,
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+  },
+  materia: {
+    display: 'flex',
+    width: 324,
+    height: 234,
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 2,
+  },
+  imgMateria: {
+    width: 324,
+    height: 234,
+    borderRadius: 30,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 2
+  },
+  overlaymateria: {
+    display: 'flex',
+    width: 324,
+    height: 234,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 2
+  },
+  textGrupo: {
+    position: 'flex',
+    width: 'auto',
+    height: 'auto',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: '600',
+    lineHeight: 20,
+    letterSpacing: -0.32,
+    color: '#FFF'
+  },
+  textMateria: {
+    position: 'flex',
+    width: 'auto',
+    height: 'auto',
+    paddingBottom: 12,
+    paddingLeft: 12,
+    paddingRight: 12,
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+    fontSize: 28,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    letterSpacing: -0.32,
+    color: '#FFF',
+    lineHeight: 28
+  },
+  Selector: {
+    display: 'flex',
+    width: 'auto',
+    height: 44,
+    top: 50,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  content: {
+    display: 'flex',
+    width: 'auto',
+    height: 'auto',
+    top: 60,
+    alignSelf: 'center',
+    marginBottom: 100,
+  },
+  btnMaterias: {
+    display: 'flex',
+    width: 100,
+    height: 'auto',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+  },
+  textMaterias: {
+    color: '#191919',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20,
+  },
+  btnEventos: {
+    display: 'flex',
+    width: 100,
+    height: 'auto',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+  },
+  textEventos: {
+    color: '#191919',
+    fontFamily: 'Roboto',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 'bold',
+    lineHeight: 20,
+  },
+  activeBtn: {
+    backgroundColor: '#49225B',
+  },
+  activeTxt: {
+    color: '#fff',
+  }
 });
 
 export default CuentaMaestro;

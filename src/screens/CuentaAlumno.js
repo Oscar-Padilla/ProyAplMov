@@ -7,8 +7,6 @@ import { db } from '../../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
-import materia1 from '../../assets/img/Materia1.png';
-import materia2 from '../../assets/img/Materia2.png';
 import evento1 from '../../assets/img/Evento1.png';
 import evento2 from '../../assets/img/Evento2.png';
 
@@ -166,17 +164,32 @@ const CuentaAlumno = () => {
                 ) : (
                   materias.map((materia, index) => (
                     <TouchableOpacity key={materia.id} onPress={() => navigation.navigate('MateriaAlumno', { idMateria: materia.id })}>
-                      <View style={styles.materia}>
-                        <ImageBackground
-                          source={index % 2 === 0 ? materia1 : materia2}
-                          style={styles.imgMateria}
-                        >
-                          <View style={styles.overlaymateria}>
-                            <Text style={styles.textGrupo}>{materia.grupo}</Text>
-                            <Text style={styles.textMateria}>{materia.nombre}</Text>
-                          </View>
-                        </ImageBackground>
-                      </View>
+                      {materia.portadaUri ? (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            source={{ uri: materia.portadaUri }}
+                            style={styles.imgMateria}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                              <Text style={styles.textMateria}>{materia.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      ) : (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                              <Text style={styles.textMateria}>{materia.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      )}
                     </TouchableOpacity>
                   ))
                 )}
@@ -191,25 +204,25 @@ const CuentaAlumno = () => {
                   ))
                 ) : eventos.length === 0 ? (
                   <Text style={{ color: theme.text, padding: 20 }}>No estás inscrito en ningún evento aún.</Text>
-                  ) : (
-                    eventos.map((evento, index) => (
-                      <TouchableOpacity
-                        key={evento.id}
-                        onPress={() => navigation.navigate(
-                          usuario.rol === 'Profesor' ? 'EventoMaestro' : 'EventoAlumno',
-                          { idEvento: evento.id }
-                        )}
-                      >
-                        <View key={evento.id} style={styles.materia}>
-                          <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
-                            <View style={styles.overlaymateria}>
-                              <Text style={styles.textMateria}>{evento.nombre}</Text>
-                            </View>
-                          </ImageBackground>
-                        </View>
-                      </TouchableOpacity>
-                    ))
-                  )}
+                ) : (
+                  eventos.map((evento, index) => (
+                    <TouchableOpacity
+                      key={evento.id}
+                      onPress={() => navigation.navigate(
+                        usuario.rol === 'Profesor' ? 'EventoMaestro' : 'EventoAlumno',
+                        { idEvento: evento.id }
+                      )}
+                    >
+                      <View key={evento.id} style={styles.materia}>
+                        <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
+                          <View style={styles.overlaymateria}>
+                            <Text style={styles.textMateria}>{evento.nombre}</Text>
+                          </View>
+                        </ImageBackground>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                )}
               </View>
             </ScrollView>
           )}

@@ -127,14 +127,32 @@ const HomeMaestro = () => {
                                                     { idMateria: materia.id }
                                                 )}
                                             >
-                                                <View style={styles.materia}>
-                                                    <ImageBackground source={index % 2 === 0 ? materia1 : materia2} style={styles.imgMateria}>
-                                                        <View style={styles.overlaymateria}>
-                                                            <Text style={styles.textGrupo}>{materia.grupo}</Text>
-                                                            <Text style={styles.textMateria}>{materia.nombre}</Text>
-                                                        </View>
-                                                    </ImageBackground>
-                                                </View>
+                                                {materia.portadaUri ? (
+                                                    <View style={styles.materia}>
+                                                        <ImageBackground
+                                                            source={{ uri: materia.portadaUri }}
+                                                            style={styles.imgMateria}
+                                                            imageStyle={{ borderRadius: 30 }}
+                                                        >
+                                                            <View style={styles.overlaymateria}>
+                                                                <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                                                                <Text style={styles.textMateria}>{materia.nombre}</Text>
+                                                            </View>
+                                                        </ImageBackground>
+                                                    </View>
+                                                ) : (
+                                                    <View style={styles.materia}>
+                                                        <ImageBackground
+                                                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                                                            imageStyle={{ borderRadius: 30 }}
+                                                        >
+                                                            <View style={styles.overlaymateria}>
+                                                                <Text style={styles.textGrupo}>{materia.grupo}</Text>
+                                                                <Text style={styles.textMateria}>{materia.nombre}</Text>
+                                                            </View>
+                                                        </ImageBackground>
+                                                    </View>
+                                                )}
                                             </TouchableOpacity>
                                         ))}
                                     </View>

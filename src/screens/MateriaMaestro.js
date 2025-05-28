@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Dimensions, Image } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
@@ -45,9 +45,32 @@ const MateriaMaestro = () => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
 
-                const horario = Object.entries(data.horario || {})
-                    .filter(([key]) => ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].includes(key))
-                    .map(([dia, detalles]) => ({ dia, inicio: detalles.inicio, fin: detalles.fin, lugar: detalles.lugar }));
+                const dias = data.creditos === '4' ? ['lunes', 'martes', 'miércoles', 'jueves'] : ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+                const lugaresCollection = collection(db, 'lugares');
+                const lugaresSnap = await getDocs(lugaresCollection);
+                const mapaLugares = {};
+                lugaresSnap.forEach(doc => {
+                    mapaLugares[doc.id] = doc.data().nombre;
+                });
+
+                const horario = dias.map(dia => {
+                    const minuscula = data.horario[dia] || {};
+                    const mayuscula = data.horario[dia.charAt(0).toUpperCase() + dia.slice(1)] || {};
+
+                    const inicio = minuscula.inicio || mayuscula.inicio || null;
+                    const fin = minuscula.fin || mayuscula.fin || null;
+                    const lugarId = minuscula.lugar || mayuscula.lugar || null;
+                    const lugarNombre = lugarId ? (mapaLugares[lugarId] || lugarId) : 'Sin lugar';
+
+                    return {
+                        dia,
+                        inicio,
+                        fin,
+                        lugar: lugarNombre
+                    };
+                });
+
+
 
                 setMateria({ ...data, horario });
 
@@ -112,13 +135,18 @@ const MateriaMaestro = () => {
     return (
         <View style={[styles.overlay, { backgroundColor: theme.background }]}>
             <ScrollView vertical showsVerticalScrollIndicator={false}>
-                <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                        <AntDesign name="left" size={24} color='white' />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setModalOpcionesVisible(true)} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white', top: -8 }}>...</Text>
-                    </TouchableOpacity>
+                <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
+                    {materia.portadaUri ? (
+                        <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }} resizeMode="cover" />
+                    ) : null}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40 }}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+                            <AntDesign name="left" size={24} color='white' />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setModalOpcionesVisible(true)} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white', top: -8 }}>...</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <View style={styles.infoProfile}>

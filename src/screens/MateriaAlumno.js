@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Modal, Image } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
@@ -108,14 +108,30 @@ const MateriaAlumno = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
 
-        const horario = Object.entries(data.horario || {})
-          .filter(([key]) => ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].includes(key))
-          .map(([dia, detalles]) => ({
+        const dias = data.creditos === '4' ? ['lunes', 'martes', 'miércoles', 'jueves'] : ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+        const lugaresCollection = collection(db, 'lugares');
+        const lugaresSnap = await getDocs(lugaresCollection);
+        const mapaLugares = {};
+        lugaresSnap.forEach(doc => {
+          mapaLugares[doc.id] = doc.data().nombre;
+        });
+
+        const horario = dias.map(dia => {
+          const minuscula = data.horario[dia] || {};
+          const mayuscula = data.horario[dia.charAt(0).toUpperCase() + dia.slice(1)] || {};
+
+          const inicio = minuscula.inicio || mayuscula.inicio || null;
+          const fin = minuscula.fin || mayuscula.fin || null;
+          const lugarId = minuscula.lugar || mayuscula.lugar || null;
+          const lugarNombre = lugarId ? (mapaLugares[lugarId] || lugarId) : 'Sin lugar';
+
+          return {
             dia,
-            inicio: detalles.inicio,
-            fin: detalles.fin,
-            lugar: detalles.lugar,
-          }));
+            inicio,
+            fin,
+            lugar: lugarNombre
+          };
+        });
 
         setMateria({ ...data, horario });
 
@@ -299,6 +315,9 @@ const MateriaAlumno = () => {
 
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
         <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
+          {materia.portadaUri ? (
+            <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }} resizeMode="cover" />
+          ) : null}
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={{
@@ -345,11 +364,6 @@ const MateriaAlumno = () => {
             <Text style={[styles.textRole, { color: theme.text }]}>{profesor.rol} • {profesor.departamento || 'Departamento no especificado'}</Text>
           </View>
         </View>
-        {/* <View style={styles.RatingAsistencias}>
-          <TouchableOpacity style={[styles.btnRating, { backgroundColor: theme.primary }]}>
-            <Text style={styles.textRating}>¡Inscríbeme!</Text>
-          </TouchableOpacity>
-        </View> */}
         <View style={styles.Selector}>
           <TouchableOpacity
             style={[styles.btnMaterias, selected === 'verasistencias' && styles.activeBtn, selected === 'verasistencias' && { backgroundColor: theme.primary }]}
@@ -376,18 +390,20 @@ const MateriaAlumno = () => {
                   for (let i = 0; i < materia.horario.length; i += 2) {
                     rows.push(
                       <View key={i} style={styles.contentRow}>
-                        <View style={styles.contentIndi}>
-                          <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i].dia.charAt(0).toUpperCase() + materia.horario[i].dia.slice(1)}</Text>
-                          <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i].inicio} - {materia.horario[i].fin}</Text>
-                          <Text style={styles.textLocation}>{materia.horario[i].lugar}</Text>
-                        </View>
-                        {materia.horario[i + 1] && (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                           <View style={styles.contentIndi}>
-                            <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i + 1].dia.charAt(0).toUpperCase() + materia.horario[i + 1].dia.slice(1)}</Text>
-                            <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i + 1].inicio} - {materia.horario[i + 1].fin}</Text>
-                            <Text style={styles.textLocation}>{materia.horario[i + 1].lugar}</Text>
+                            <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i].dia.charAt(0).toUpperCase() + materia.horario[i].dia.slice(1)}</Text>
+                            <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i].inicio} - {materia.horario[i].fin}</Text>
+                            <Text style={styles.textLocation}>{materia.horario[i].lugar}</Text>
                           </View>
-                        )}
+                          {materia.horario[i + 1] && (
+                            <View style={styles.contentIndi}>
+                              <Text style={[styles.textDay, { color: theme.text }]}>{materia.horario[i + 1].dia.charAt(0).toUpperCase() + materia.horario[i + 1].dia.slice(1)}</Text>
+                              <Text style={[styles.textTime, { color: theme.text }]}>{materia.horario[i + 1].inicio} - {materia.horario[i + 1].fin}</Text>
+                              <Text style={styles.textLocation}>{materia.horario[i + 1].lugar}</Text>
+                            </View>
+                          )}
+                        </ScrollView>
                       </View>
                     );
                   }
