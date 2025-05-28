@@ -59,6 +59,7 @@ const EventoAlumno = () => {
 
     useEffect(() => {
         if (idEvento) {
+            lockPortrait();
             obtenerAsistencias();
         }
     }, [currentMonth, idEvento]);

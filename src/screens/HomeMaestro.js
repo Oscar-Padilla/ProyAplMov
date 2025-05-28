@@ -50,7 +50,7 @@ const HomeMaestro = () => {
         try {
             const snapshot = await getDocs(collection(db, "eventos"));
             const eventosDelMaestro = snapshot.docs
-                .filter(doc => doc.data().creadoPor === usuario.uid)
+                .filter(doc => doc.data().organizadorId === usuario.uid)
                 .map(doc => ({ id: doc.id, ...doc.data() }));
             setEventos(eventosDelMaestro);
         } catch (error) {
@@ -170,29 +170,55 @@ const HomeMaestro = () => {
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     <View style={styles.dataMaterias}>
                                         {[1, 2].map((_, i) => (
-                                            <View key={i} style={[styles.materia, { backgroundColor: '#ddd', borderRadius: 30 }]} />
+                                            <View key={i} style={[styles.materia, { backgroundColor: '#ccc', borderRadius: 30 }]} />
                                         ))}
                                     </View>
                                 </ScrollView>
                             ) : eventos.length === 0 ? (
-                                <Text style={[styles.emptyTitle, { color: theme.text }]}>No tienes eventos</Text>
+                                <Text style={[styles.emptyTitle, { color: theme.text }]}>No tienes Eventos</Text>
                             ) : (
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     <View style={styles.dataMaterias}>
                                         {eventos.map((evento, index) => (
-                                            <View key={evento.id} style={styles.materia}>
-                                                <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
-                                                    <View style={styles.overlaymateria}>
-                                                        <Text style={styles.textMateria}>{evento.nombre}</Text>
+                                            <TouchableOpacity
+                                                key={evento.id}
+                                                onPress={() => navigation.navigate(
+                                                    usuario.rol === 'Profesor' ? 'EventoMaestro' : 'EventoAlumno',
+                                                    { idEvento: evento.id }
+                                                )}
+                                            >
+                                                {evento.portadaUri ? (
+                                                    <View style={styles.materia}>
+                                                        <ImageBackground
+                                                            source={{ uri: evento.portadaUri }}
+                                                            style={styles.imgMateria}
+                                                            imageStyle={{ borderRadius: 30 }}
+                                                        >
+                                                            <View style={styles.overlaymateria}>
+                                                                <Text style={styles.textMateria}>{evento.nombre}</Text>
+                                                            </View>
+                                                        </ImageBackground>
                                                     </View>
-                                                </ImageBackground>
-                                            </View>
+                                                ) : (
+                                                    <View style={styles.materia}>
+                                                        <ImageBackground
+                                                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                                                            imageStyle={{ borderRadius: 30 }}
+                                                        >
+                                                            <View style={styles.overlaymateria}>
+                                                                <Text style={styles.textMateria}>{evento.nombre}</Text>
+                                                            </View>
+                                                        </ImageBackground>
+                                                    </View>
+                                                )}
+                                            </TouchableOpacity>
                                         ))}
                                     </View>
                                 </ScrollView>
                             )}
                         </View>
                     </View>
+
                 </>
             )}
         </View>

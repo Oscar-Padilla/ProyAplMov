@@ -49,7 +49,7 @@ const CuentaMaestro = () => {
     try {
       const snapshot = await getDocs(collection(db, 'eventos'));
       const creados = snapshot.docs
-        .filter(doc => doc.data().profesorId === usuario.uid)
+        .filter(doc => doc.data().organizadorId === usuario.uid)
         .map(doc => ({ id: doc.id, ...doc.data() }));
       setEventos(creados);
     } catch (error) {
@@ -146,16 +146,32 @@ const CuentaMaestro = () => {
                   <Text style={{ color: theme.text, padding: 20 }}>No has creado eventos aún.</Text>
                 ) : (
                   eventos.map((evento, index) => (
-                    <View key={evento.id} style={styles.materia}>
-                      <ImageBackground
-                        source={index % 2 === 0 ? evento1 : evento2}
-                        style={styles.imgMateria}
-                      >
-                        <View style={styles.overlaymateria}>
-                          <Text style={styles.textMateria}>{evento.nombre}</Text>
+                    <TouchableOpacity key={evento.id} onPress={() => navigation.navigate('EventoMaestro', { idEvento: evento.id })}>
+                      {evento.portadaUri ? (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            source={{ uri: evento.portadaUri }}
+                            style={styles.imgMateria}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
                         </View>
-                      </ImageBackground>
-                    </View>
+                      ) : (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      )}
+                    </TouchableOpacity>
                   ))
                 )}
               </View>

@@ -36,6 +36,7 @@ import HomeMaestro from './src/screens/HomeMaestro';
 import CuentaMaestro from './src/screens/CuentaMaestro';
 import CreacionMaestro from './src/screens/CreacionMaestro';
 import MateriaMaestro from './src/screens/MateriaMaestro';
+import EventoMaestro from './src/screens/EventoMaestro';
 import CrearMateria from './src/screens/CrearMateria';
 import CrearMateria1 from './src/screens/CrearMateria1';
 import CrearMateria2 from './src/screens/CrearMateria2';
@@ -43,6 +44,11 @@ import CrearMateria3 from './src/screens/CrearMateria3';
 import CrearMateria4 from './src/screens/CrearMateria4';
 import CrearMateria5 from './src/screens/CrearMateria5';
 import CrearEvento from  './src/screens/CrearEvento';
+import CrearEvento1 from  './src/screens/CrearEvento1';
+import CrearEvento2 from  './src/screens/CrearEvento2';
+import CrearEvento3 from  './src/screens/CrearEvento3';
+import CrearEvento4 from  './src/screens/CrearEvento4';
+import CrearEvento5 from  './src/screens/CrearEvento5';
 
 
 const Stack = createStackNavigator();
@@ -80,6 +86,7 @@ function HomeMaestroStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeMaestro" component={HomeMaestro} />
       <Stack.Screen name="MateriaMaestro" component={MateriaMaestro} />
+      <Stack.Screen name="EventoMaestro" component={EventoMaestro} />
     </Stack.Navigator>
   );
 }
@@ -103,6 +110,7 @@ function CuentaMaestroStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CuentaMaestro" component={CuentaMaestro} />
       <Stack.Screen name="MateriaMaestro" component={MateriaMaestro} />
+      <Stack.Screen name="EventoMaestro" component={EventoMaestro} />
     </Stack.Navigator>
   );
 }
@@ -119,7 +127,12 @@ function CreacionMaestroStack() {
       <Stack.Screen name="CrearMateria3" component={CrearMateria3} />
       <Stack.Screen name="CrearMateria4" component={CrearMateria4} />
       <Stack.Screen name="CrearMateria5" component={CrearMateria5} />
-      {/* <Stack.Screen name="CrearEvento" component={CrearEvento} /> */}
+      <Stack.Screen name="CrearEvento" component={CrearEvento} />
+      <Stack.Screen name="CrearEvento1" component={CrearEvento1} />
+      <Stack.Screen name="CrearEvento2" component={CrearEvento2} />
+      <Stack.Screen name="CrearEvento3" component={CrearEvento3} />
+      <Stack.Screen name="CrearEvento4" component={CrearEvento4} />
+      <Stack.Screen name="CrearEvento5" component={CrearEvento5} />
     </Stack.Navigator>
   );
 }
