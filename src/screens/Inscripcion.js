@@ -74,6 +74,20 @@ export default function QRScannerScreen() {
                     });
                 }
             }
+            // Inserta en colección de inscripciones
+            if (tipo === 'evento') {
+                const inscripcionId = `${usuario.uid}__${id}`;
+                const inscripcionRef = doc(db, 'inscripciones_evento', inscripcionId);
+                const inscripcionSnap = await getDoc(inscripcionRef);
+
+                if (!inscripcionSnap.exists()) {
+                    await setDoc(inscripcionRef, {
+                        uid: usuario.uid,
+                        eventoId: id,
+                        estado: "registrado"
+                    });
+                }
+            }
 
             setScanned(true);
             alert(`¡Inscrito correctamente en la ${tipo}: ${nombre}!`);
@@ -84,11 +98,13 @@ export default function QRScannerScreen() {
                     screen: 'MateriaAlumno',
                     params: { idMateria: id },
                 });
+                setScanned(false);
             } else {
                 navigation.navigate('CuentaAlumnoTabs', {
                     screen: 'EventoAlumno',
                     params: { idEvento: id },
                 });
+                setScanned(false);
             }
 
         } catch (error) {
@@ -139,9 +155,9 @@ export default function QRScannerScreen() {
                 </View>
             )}
 
-            {scanned && (
+            {/* {scanned && (
                 <Button title="Escanear otro QR" onPress={reiniciarEscaneo} />
-            )}
+            )} */}
         </View>
     );
 }

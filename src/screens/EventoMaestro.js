@@ -1,44 +1,75 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Modal, Image, Dimensions } from 'react-native';
 import { lockPortrait } from '../../assets/utils/orientationUtils';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { db } from '../../firebaseConfig';
-import { doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { updateDoc, arrayRemove, deleteDoc } from 'firebase/firestore';
 import QRCode from 'react-native-qrcode-svg';
 
-const { width: screenWidth } = Dimensions.get('window');
 
 const EventoMaestro = () => {
+    const screenWidth = Dimensions.get('window').width;
     const route = useRoute();
-    const { idEvento } = route.params;
     const navigation = useNavigation();
     const { theme } = useTheme();
     const { usuario } = useUser();
+    const { idEvento } = route.params;
+
 
     const [selected, setSelected] = useState('inscrito');
     const [evento, setEvento] = useState(null);
-    const [organizador, setOrganizador] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [modalOpcionesVisible, setModalOpcionesVisible] = useState(false);
     const [modalConfirmacionVisible, setModalConfirmacionVisible] = useState(false);
     const [modalQRVisible, setModalQRVisible] = useState(false);
     const [qrContent, setQrContent] = useState('');
     const [alumnos, setAlumnos] = useState([]);
+    const [inscritos, setInscritos] = useState();
+
+    const obtenerAlumnosRegistradosEvento = async (idEvento) => {
+        try {
+            // 1. Consultar inscripciones_evento filtrando por eventoId y estado registrado
+            const q = query(
+                collection(db, 'inscripciones_evento'),
+                where('eventoId', '==', idEvento),
+                where('estado', '==', 'registrado')
+            );
+
+            const querySnapshot = await getDocs(q);
+            const alumnosRegistrados = [];
+
+            for (const docu of querySnapshot.docs) {
+                const { uid } = docu.data();
+
+                // 2. Obtener datos del usuario por uid
+                const usuarioRef = doc(db, 'usuarios', uid);
+                const usuarioSnap = await getDoc(usuarioRef);
+
+                if (usuarioSnap.exists()) {
+                    alumnosRegistrados.push({ uid, ...usuarioSnap.data() });
+                }
+            }
+
+            return alumnosRegistrados;
+        } catch (error) {
+            console.error('Error obteniendo alumnos registrados:', error);
+            return [];
+        }
+    };
 
     useEffect(() => {
-        lockPortrait();
-        obtenerDatosEvento();
-    }, []);
+        const cargarAlumnos = async () => {
+            const alumnos = await obtenerAlumnosRegistradosEvento(idEvento);
+            setAlumnos(alumnos);
+        };
+        cargarAlumnos();
+    }, [idEvento]);
 
-    useEffect(() => {
-        navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
-    }, [navigation]);
 
-
-    const obtenerDatosEvento = async (idEvento, setEvento, setOrganizador, setQrContent, setLoading) => {
+    const obtenerDatosEvento = async () => {
         try {
             const docRef = doc(db, 'eventos', idEvento);
             const docSnap = await getDoc(docRef);
@@ -46,7 +77,13 @@ const EventoMaestro = () => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
 
-                // Obtener lugares y mapear id => nombre
+                // Asumiendo que el evento tiene un programa con días, horas y lugares,
+                // si no, se puede adaptar según tu modelo de datos.
+                // Aquí no hago un mapeo de días fijo porque el evento puede tener
+                // programa con objetos con títulos, horarios y lugar.
+                // Pero si quieres adaptar igual el lugar con su nombre:
+
+                // Cargar mapa de lugares
                 const lugaresCollection = collection(db, 'lugares');
                 const lugaresSnap = await getDocs(lugaresCollection);
                 const mapaLugares = {};
@@ -54,24 +91,25 @@ const EventoMaestro = () => {
                     mapaLugares[doc.id] = doc.data().nombre;
                 });
 
-                // Construir arreglo de programa con lugar legible
-                const programa = (data.programa || []).map(item => {
+                // Mapear programa para reemplazar lugarId por nombre
+                const programa = data.programa?.map(item => {
                     const lugarNombre = item.lugar ? (mapaLugares[item.lugar] || item.lugar) : 'Sin lugar';
                     return {
                         ...item,
                         lugar: lugarNombre,
                     };
-                });
+                }) || [];
 
+                // Actualizar estado con programa ya mapeado
                 setEvento({ ...data, programa });
 
-                // Obtener organizador (profesor)
-                if (data.organizadorId) {
-                    const orgSnap = await getDoc(doc(db, 'usuarios', data.organizadorId));
-                    if (orgSnap.exists()) setOrganizador(orgSnap.data());
+                // Obtener info del profesor o encargado si tienes ese campo
+                if (data.profesorId) {
+                    const profSnap = await getDoc(doc(db, 'usuarios', data.profesorId));
+                    if (profSnap.exists()) setProfesor(profSnap.data());
                 }
 
-                // Obtener o crear QR
+                // Generar QR si no existe
                 if (data.qr) {
                     setQrContent(data.qr);
                 } else {
@@ -80,10 +118,6 @@ const EventoMaestro = () => {
                     setQrContent(nuevoQR);
                 }
 
-                // Opcional: carga inscritos/asistentes aquí si tienes
-
-            } else {
-                console.warn("Evento no encontrado:", idEvento);
             }
         } catch (error) {
             console.error('Error al cargar evento:', error);
@@ -93,77 +127,108 @@ const EventoMaestro = () => {
     };
 
 
-    const eliminarEvento = async (idEvento, navigation) => {
+
+    useEffect(() => {
+        lockPortrait();
+        obtenerDatosEvento();
+    }, []);
+
+    const eliminarEvento = async () => {
         try {
-            // Eliminar documento del evento
             await deleteDoc(doc(db, 'eventos', idEvento));
 
-            // Obtener usuarios inscritos en el evento
-            const usuariosSnap = await getDocs(query(collection(db, 'usuarios'), where('eventosInscritas', 'array-contains', idEvento)));
-
-            // Actualizar lista de eventos inscritos para cada usuario (remover evento eliminado)
+            const usuariosSnap = await getDocs(query(collection(db, 'usuarios'), where('eventosInscritos', 'array-contains', idEvento)));
             for (const u of usuariosSnap.docs) {
                 const datos = u.data();
-                const nuevas = datos.eventosInscritas.filter(id => id !== idEvento);
-                await updateDoc(doc(db, 'usuarios', u.id), { eventosInscritas: nuevas });
+                const nuevas = datos.materiasInscritas.filter(id => id !== idMateria);
+                await updateDoc(doc(db, 'usuarios', u.id), { materiasInscritas: nuevas });
             }
 
-            // Obtener asistencias al evento para eliminar
-            const asistenciasSnap = await getDocs(query(collection(db, 'asistencias_evento'), where('eventId', '==', idEvento)));
+            const asistenciasSnap = await getDocs(query(collection(db, 'asistencias_evento'), where('eventoId', '==', idEvento)));
             for (const a of asistenciasSnap.docs) {
                 await deleteDoc(doc(db, 'asistencias_evento', a.id));
             }
 
-            // Regresar a la pantalla anterior
             navigation.goBack();
-
         } catch (error) {
             console.error('Error eliminando evento:', error);
         }
     };
 
-    if (loading || !evento || !organizador) {
+    if (!evento) {
         return (
-            <View style={[styles.overlay, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }]}>
-                <Text style={{ color: theme.text }}>Cargando...</Text>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }]}>
+                <Text style={{ color: theme.text }}>Cargando evento...</Text>
             </View>
         );
     }
 
     return (
         <View style={[styles.overlay, { backgroundColor: theme.background }]}>
-            <ScrollView vertical showsVerticalScrollIndicator={false}>
-                <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
+            <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
+                <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
                     {evento.portadaUri ? (
-                        <Image source={{ uri: evento.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }} resizeMode="cover" />
+                        <Image source={{ uri: evento.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute' }} resizeMode="cover" />
                     ) : null}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40 }}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                            <AntDesign name="left" size={24} color='white' />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalOpcionesVisible(true)} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white', top: -8 }}>...</Text>
-                        </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 100,
+                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <AntDesign name="left" size={24} color='white' />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setModalOpcionesVisible(true)}
+                        style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 100,
+                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                        <Text style={{
+                            fontSize: 24,
+                            fontWeight: 'bold',
+                            color: 'white',
+                            top: -8
+                        }}>...</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.infoProfile}>
+                    <View style={styles.infoName}>
+                        <Text style={[styles.textName, { color: theme.text }]}>{evento.nombre}</Text>
+                    </View>
+                    <View style={styles.infoStats}>
+                        <Text style={[styles.textStats, { color: theme.text }]}>{evento.Universidad}</Text>
+                        <Text style={[styles.textStats, { color: theme.text }]}>{evento.descripcion}</Text>
+                    </View>
+                    <View style={styles.infoRole}>
+                        <Text style={[styles.textRole, { color: theme.text }]}>
+                            {new Date(evento.fecha)
+                                .toLocaleDateString('es-MX', {
+                                    weekday: 'long',
+                                    day: 'numeric',
+                                    month: 'long'
+                                })
+                                .replace(/^\w/, (c) => c.toUpperCase())}
+                        </Text>
                     </View>
                 </View>
-
-                <View style={styles.infoProfile}>
-                    <Text style={[styles.textName, { color: theme.text }]}>{evento.nombre}</Text>
-                    <Text style={[styles.textStats, { color: theme.text }]}>{evento.grupo}</Text>
-                    <Text style={[styles.textStats, { color: theme.text }]}>{organizador.nombre} {organizador.apellido}</Text>
-                    <Text style={[styles.textEmail, { color: theme.text }]}>{organizador.correo}</Text>
-                    <Text style={[styles.textRole, { color: theme.text }]}>{organizador.rol} • {organizador.departamento || 'Departamento no especificado'}</Text>
-                </View>
-
                 <View style={styles.Selector}>
                     <TouchableOpacity style={[styles.btnMaterias, selected === 'verasistencias' && styles.activeBtn, selected === 'verasistencias' && { backgroundColor: theme.primary }]} onPress={() => setSelected(prev => (prev === 'verasistencias' ? null : 'verasistencias'))}>
-                        <Text style={[styles.textMaterias, selected === 'verasistencias' ? styles.activeTxt : { color: theme.text }]}>Ver asistencias</Text>
+                        <Text style={[styles.textMaterias, selected === 'verasistencias' ? styles.activeTxt : { color: theme.text }]}>Ver inscritos</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.btnEventos, { backgroundColor: theme.primary }]} onPress={() => setModalQRVisible(true)}>
                         <Text style={[styles.textEventos, styles.activeTxt]}>Ver QR</Text>
                     </TouchableOpacity>
                 </View>
-
                 <View style={styles.content}>
                     {selected === 'verasistencias' ? (
                         <View>
@@ -172,38 +237,42 @@ const EventoMaestro = () => {
                             </View>
                             <View style={styles.asistenciaContent}>
                                 {alumnos.map(alumno => (
-                                    <View key={alumno.id} style={[styles.card, { backgroundColor: theme.card, width: screenWidth - 80, alignSelf: 'center' }]}>
-                                        <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 20, paddingBottom: 4 }}>{alumno.nombre} {alumno.apellido}</Text>
-                                        {alumno.asistencias.map((a, i) => (
-                                            <Text key={i} style={{ color: a.presente ? 'green' : 'red', paddingBottom: 2, fontSize: 16 }}>
-                                                {a.fecha} - {a.presente ? 'Presente' : 'Ausente'}
-                                            </Text>
-                                        ))}
+                                    <View
+                                        key={alumno.id ?? alumno.uid}
+                                        style={[
+                                            styles.card,
+                                            { backgroundColor: theme.card, width: screenWidth - 80, alignSelf: 'center' }
+                                        ]}
+                                    >
+                                        <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 20, paddingBottom: 4 }}>
+                                            {alumno.nombre} {alumno.apellido}
+                                        </Text>
                                     </View>
                                 ))}
                             </View>
                         </View>
+
                     ) : (
                         <View>
                             <View style={styles.horario}>
-                                <Text style={[styles.textHorario, { color: theme.text }]}>Horario</Text>
+                                <Text style={[styles.textHorario, { color: theme.text }]}>Programa</Text>
                             </View>
                             <View style={styles.horarioContent}>
                                 {(() => {
                                     const rows = [];
-                                    for (let i = 0; i < evento.horario.length; i += 2) {
+                                    for (let i = 0; i < evento.programa.length; i += 2) {
                                         rows.push(
                                             <View key={i} style={styles.contentRow}>
                                                 <View style={styles.contentIndi}>
-                                                    <Text style={[styles.textDay, { color: theme.text }]}>{evento.horario[i].dia.charAt(0).toUpperCase() + evento.horario[i].dia.slice(1)}</Text>
-                                                    <Text style={[styles.textTime, { color: theme.text }]}>{evento.horario[i].inicio} - {evento.horario[i].fin}</Text>
-                                                    <Text style={styles.textLocation}>{evento.horario[i].lugar}</Text>
+                                                    <Text style={[styles.textDay, { color: theme.text }]}>{evento.programa[i].titulo}</Text>
+                                                    <Text style={[styles.textTime, { color: theme.text }]}>{evento.programa[i].horaInicio} - {evento.programa[i].horaFin}</Text>
+                                                    <Text style={styles.textLocation}>{evento.programa[i].lugar}</Text>
                                                 </View>
-                                                {evento.horario[i + 1] && (
+                                                {evento.programa[i + 1] && (
                                                     <View style={styles.contentIndi}>
-                                                        <Text style={[styles.textDay, { color: theme.text }]}>{evento.horario[i + 1].dia.charAt(0).toUpperCase() + evento.horario[i + 1].dia.slice(1)}</Text>
-                                                        <Text style={[styles.textTime, { color: theme.text }]}>{evento.horario[i + 1].inicio} - {evento.horario[i + 1].fin}</Text>
-                                                        <Text style={styles.textLocation}>{evento.horario[i + 1].lugar}</Text>
+                                                        <Text style={[styles.textDay, { color: theme.text }]}>{evento.programa[i + 1].titulo}</Text>
+                                                        <Text style={[styles.textTime, { color: theme.text }]}>{evento.programa[i + 1].horaInicio} - {evento.programa[i + 1].horaFin}</Text>
+                                                        <Text style={styles.textLocation}>{evento.programa[i + 1].lugar}</Text>
                                                     </View>
                                                 )}
                                             </View>
@@ -212,11 +281,11 @@ const EventoMaestro = () => {
                                     return rows;
                                 })()}
                             </View>
+
                         </View>
                     )}
                 </View>
             </ScrollView>
-
             {/* Modal QR */}
             <Modal visible={modalQRVisible} transparent animationType="slide">
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }}>
@@ -235,13 +304,13 @@ const EventoMaestro = () => {
                     <View style={{ backgroundColor: theme.card, padding: 25, borderTopLeftRadius: 30, borderTopRightRadius: 30, alignItems: 'center' }}>
                         <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.text, marginBottom: 12 }}>¿Estás seguro?</Text>
                         <Text style={{ fontSize: 14, color: theme.text, textAlign: 'center', marginBottom: 30 }}>
-                            Al eliminar <Text style={{ fontWeight: 'bold' }}>aceptas</Text> que toda la información de la evento se perderá.
+                            Al eliminar <Text style={{ fontWeight: 'bold' }}>aceptas</Text> que toda la información del evento se perderá.
                         </Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                             <TouchableOpacity onPress={() => setModalOpcionesVisible(false)} style={{ flex: 1, backgroundColor: theme.primary, padding: 10, borderRadius: 50, marginRight: 10, alignItems: 'center' }}>
                                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={eliminarMateria} style={{ flex: 1, backgroundColor: '#E0E0E0', padding: 10, borderRadius: 50, marginLeft: 10, alignItems: 'center' }}>
+                            <TouchableOpacity onPress={eliminarEvento} style={{ flex: 1, backgroundColor: '#E0E0E0', padding: 10, borderRadius: 50, marginLeft: 10, alignItems: 'center' }}>
                                 <Text style={{ color: '#000', fontWeight: 'bold' }}>Estoy seguro</Text>
                             </TouchableOpacity>
                         </View>
@@ -259,6 +328,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 12,
         marginBottom: 16,
+        marginTop: 10
     },
     overlay: {
         flex: 1,
@@ -267,7 +337,7 @@ const styles = StyleSheet.create({
     },
     profileBg: {
         display: 'flex',
-        width: 'auto',
+        width: '100%',
         height: 210,
         top: -30,
         backgroundColor: '#A56ABD',
@@ -285,6 +355,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         width: 'auto',
         height: 'auto',
+        paddingHorizontal: 5
     },
     textName: {
         color: '#191919',
@@ -335,7 +406,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto',
         fontSize: 16,
         fontStyle: 'normal',
-        fontWeight: '400',
+        fontWeight: 'bold',
         lineHeight: 20
     },
     RatingAsistencias: {
@@ -371,7 +442,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         flexDirection: 'row',
     },
-    evento: {
+    materia: {
         display: 'flex',
         width: 324,
         height: 234,
@@ -507,17 +578,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 20,
         marginTop: 12
-    },
-    asistenciaContent: {
-        flex: 1,
-        display: 'flex',
-        width: 'auto',
-        height: 'auto',
-        paddingLeft: 14,
-        paddingRight: 14,
-        marginBottom: 0,
-        flexDirection: 'column',
-        marginTop: 12,
     },
     calendarioContent: {
         display: 'flex',

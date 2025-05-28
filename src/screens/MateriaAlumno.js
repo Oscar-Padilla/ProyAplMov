@@ -316,7 +316,7 @@ const MateriaAlumno = () => {
       <ScrollView vertical={true} style={{ flexDirection: 'column' }} showsVerticalScrollIndicator={false}>
         <View style={[styles.profileBg, { backgroundColor: theme.primary, justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40, flexDirection: 'row' }]}>
           {materia.portadaUri ? (
-            <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }} resizeMode="cover" />
+            <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210}} resizeMode="cover" />
           ) : null}
           <TouchableOpacity
             onPress={() => navigation.goBack()}

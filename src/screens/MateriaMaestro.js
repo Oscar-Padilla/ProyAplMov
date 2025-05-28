@@ -137,7 +137,7 @@ const MateriaMaestro = () => {
             <ScrollView vertical showsVerticalScrollIndicator={false}>
                 <View style={[styles.profileBg, { backgroundColor: theme.primary }]}>
                     {materia.portadaUri ? (
-                        <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 }} resizeMode="cover" />
+                        <Image source={{ uri: materia.portadaUri }} style={{ width: '100%', height: 210, position: 'absolute'}} resizeMode="cover" />
                     ) : null}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 14, paddingTop: 40 }}>
                         <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 44, height: 44, borderRadius: 100, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     },
     profileBg: {
         display: 'flex',
-        width: 'auto',
+        width: '100%',
         height: 210,
         top: -30,
         backgroundColor: '#A56ABD',
