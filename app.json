@@ -1,9 +1,19 @@
 {
   "expo": {
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
+    ],
     "name": "ProyAplMov",
     "slug": "ProyAplMov",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/img/Logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -13,16 +23,29 @@
       "backgroundColor": "white"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta aplicación necesita acceso a la cámara para escanear códigos QR."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/Logo.png",
         "backgroundColor": "white"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.deska.ProyAplMov"
     },
     "web": {
       "favicon": "./assets/img/Logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8f2a74e6-4420-4c2e-83c1-fb8c0c3e12f7"
+      }
     }
   }
 }

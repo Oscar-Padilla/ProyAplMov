@@ -3,24 +3,24 @@ import left from '../../assets/img/CaretLeft.png';
 import { useState } from 'react';
 
 
-const Registrate2 = ({ navigation, route }) => {
+const CrearMateria = ({ navigation }) => {
   const [text, setText] = useState("");
-  const paginaActual = 3;
-  const totalPaginas = 4;
+  const paginaActual = 1;
+  const totalPaginas = 6;
   const progreso = paginaActual / totalPaginas;
 
   return (
     <View style={styles.overlay}>
       <View style={styles.modalContainer}>
-        <TouchableOpacity onPress={() => navigation.goBack("Registrate1")} style={styles.closeButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("CreacionMaestro")} style={styles.closeButton}>
           <Image source={left} style={styles.closeText} />
         </TouchableOpacity>
-        <Text style={styles.title}>Regístrate</Text>
+        <Text style={styles.title}>Materia</Text>
         <View style={styles.forms}>
-          <Text style={styles.correoText}>¿Cuál es tu nombre?</Text>
+          <Text style={styles.correoText}>¿Cuál es el nombre de la materia?</Text>
           <TextInput
             style={styles.inputCorreo}
-            placeholder="Nombre"
+            placeholder="Materia"
             placeholderTextColor={'#A5A5A5'}
             value={text}
             onChangeText={setText}
@@ -32,11 +32,7 @@ const Registrate2 = ({ navigation, route }) => {
             <View style={[styles.progressBarFill, { width: `${progreso * 100}%` }]} />
             <Text style={styles.progressText}>{paginaActual} de {totalPaginas}</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("Registrate3", {
-            correo: route.params?.correo,
-            contraseña: route.params?.contraseña,
-            nombre: text
-          })} style={styles.btnNext} >
+          <TouchableOpacity onPress={() => navigation.navigate("CrearMateria1", {materiaNombre: text})} style={styles.btnNext} >
             <Text style={styles.text}>Siguiente</Text>
           </TouchableOpacity>
         </View>
@@ -95,7 +91,7 @@ const styles = StyleSheet.create({
   correoText: {
     fontFamily: 'Roboto',
     fontSize: 36,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   btnNext: {
     backgroundColor: '#49225B',
@@ -152,4 +148,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Registrate2;
+export default CrearMateria;
