@@ -7,8 +7,7 @@ import { db } from '../../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
-import evento1 from '../../assets/img/Evento1.png';
-import evento2 from '../../assets/img/Evento2.png';
+
 
 const CuentaAlumno = () => {
   const { theme } = useTheme();
@@ -213,13 +212,30 @@ const CuentaAlumno = () => {
                         { idEvento: evento.id }
                       )}
                     >
-                      <View key={evento.id} style={styles.materia}>
-                        <ImageBackground source={index % 2 === 0 ? evento1 : evento2} style={styles.imgMateria}>
-                          <View style={styles.overlaymateria}>
-                            <Text style={styles.textMateria}>{evento.nombre}</Text>
-                          </View>
-                        </ImageBackground>
-                      </View>
+                      {evento.portadaUri ? (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            source={{ uri: evento.portadaUri }}
+                            style={styles.imgMateria}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      ) : (
+                        <View style={styles.materia}>
+                          <ImageBackground
+                            style={[styles.imgMateria, { backgroundColor: '#49225B' }]}
+                            imageStyle={{ borderRadius: 30 }}
+                          >
+                            <View style={styles.overlaymateria}>
+                              <Text style={styles.textMateria}>{evento.nombre}</Text>
+                            </View>
+                          </ImageBackground>
+                        </View>
+                      )}
                     </TouchableOpacity>
                   ))
                 )}

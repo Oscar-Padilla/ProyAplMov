@@ -7,10 +7,7 @@ import { db } from '../../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
 import { collection, getDocs } from 'firebase/firestore';
 
-import materia1 from '../../assets/img/Materia1.png';
-import materia2 from '../../assets/img/Materia2.png';
-import evento1 from '../../assets/img/Evento1.png';
-import evento2 from '../../assets/img/Evento2.png';
+
 
 const CuentaMaestro = () => {
   const { theme } = useTheme();
